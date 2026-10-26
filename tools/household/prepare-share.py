@@ -18,7 +18,7 @@ BASE = 'ac8469def67ccc5dcabbea123d023fcb5e380429'
 DOCS = {
     'SPEC.md', 'DECISIONS.md', 'OPERATIONS.md', 'PRIVACY.md', 'ANDROID-TV.md',
     'ANDROID-TV-ENTERPRISE-PLAYER-RESEARCH.md', 'FORK-ADDITIONS.md', 'SHARING.md', 'ACCEPTANCE.md',
-    'EPISODE-RECREATION.md',
+    'EPISODE-RECREATION.md', 'TV-UI-PERFORMANCE.md',
 }
 RULES = {
     'user-path': re.compile(r'(?i)[a-z]:[\\/]+(?:Users|Dev)[\\/]+[^\s\"\'<>`]+'),

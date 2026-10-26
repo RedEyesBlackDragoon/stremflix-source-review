@@ -11714,7 +11714,7 @@
 \ No newline at end of file
 --- /dev/null
 +++ b/docs/household/ACCEPTANCE.md
-@@ -0,0 +1,13 @@
+@@ -0,0 +1,15 @@
 +# Public acceptance summary
 +
 +This is a development source review, not a production release. Private test captures and account-specific evidence are omitted from the sharing package.
@@ -11724,6 +11724,8 @@
 +Build/lint and selected tests passed during development. Those runs do not establish that the sanitized export passes every platform build or real-account workflow.
 +
 +The episode-selection lifecycle regression passes on the emulator and physical Shield, alongside 16 browser routing checks and four native series tests. See [EPISODE-RECREATION.md](EPISODE-RECREATION.md) for the failing-before/passing-after test.
++
++The 0.1.12 navigation update passes two additional browser regressions and a controlled Shield navigation benchmark with ten injected D-pad moves. All six native navigation/series/lifecycle tests passed. See [TV-UI-PERFORMANCE.md](TV-UI-PERFORMANCE.md) for scope, timings, and measurement limits.
 +
 +Open release gates include Dolby Vision parity with official Stremio, audio passthrough, all add-on and episode-transition combinations, long playback, complete cross-device resume, and mobile journey coverage. See [FORK-ADDITIONS.md](FORK-ADDITIONS.md) for scope and observed limits.
 +
@@ -12004,7 +12006,7 @@
 +These checks establish lifecycle recovery and the tested episode transitions. They do not establish Dolby Vision parity, every add-on's source matching, or full player acceptance.
 --- /dev/null
 +++ b/docs/household/FORK-ADDITIONS.md
-@@ -0,0 +1,87 @@
+@@ -0,0 +1,90 @@
 +# Stremflix fork additions and review guide
 +
 +This development fork extends [dx.bi](https://github.com/notdxbi/dxbi-stremio) at upstream commit `ac8469def67ccc5dcabbea123d023fcb5e380429`. It adds separate household profiles, TV navigation changes, native player controls, and an optional household service. The source retains the upstream MIT license and attribution.
@@ -12024,6 +12026,7 @@
 +| Desktop local profiles | Persistent Electron session partitions and a local profile controller/store alongside the optional server-backed launcher | `app/src/household/` |
 +| Profile switching | Profile controls in the Stremio header and return to the picker without requiring a new Stremio sign-in | `MainActivity.kt`, `tv/app/src/main/assets/dxbi-tv.js` |
 +| Android TV browsing | A cached row/grid index, direct row movement, visible CSS sort order, retained grid columns, See All navigation, and navigation through both Library filter rows | `dxbi.plugin.js` |
++| Catalog loading during navigation | Cache each TV track independently so a late poster does not trigger a full-catalog visibility scan on the next arrow press | `dxbi.plugin.js`, [measurements](TV-UI-PERFORMANCE.md) |
 +| Held remote input | Repeated-key coalescing, an intentional transition from the top Library row to its filters, and deferred background sorting while the grid has focus | `dxbi.plugin.js` |
 +| TV rendering defaults | Fast TV browsing mode, instant navigation scrolling, fewer automatic visual/audio effects, and delayed previews after a title remains selected | `dxbi.plugin.js`, `dxbi.theme.css` |
 +| Native player series controls | Episodes panel, season navigation, Next Episode, Up Next, and binge-watching settings passed from Stremio | `SeriesPlayback.kt`, `PlayerActivity.kt`, `dxbi-tv.js` |
@@ -12065,7 +12068,9 @@
 +
 +## Validation and known gaps
 +
-+Android builds and lint passed during development. All 16 browser episode-routing checks and five native series/lifecycle tests passed on the emulator. The lifecycle regression also passed on a physical Shield. It destroys the browsing activity while episode 10 is open, then selects episode 9 through the native Episodes panel. The same test failed against the previous APK at the expected episode-9 assertion. See [the lifecycle fix and reproduction](EPISODE-RECREATION.md).
++Android builds and lint passed during development. All 16 browser episode-routing checks passed. Five native series/lifecycle tests passed on the emulator and physical Shield. Two additional browser tests cover navigation work, visual sorting, resized grids, and watched-title visibility. The lifecycle regression also passed on a physical Shield. It destroys the browsing activity while episode 10 is open, then selects episode 9 through the native Episodes panel. The same test failed against the previous APK at the expected episode-9 assertion. See [the lifecycle fix and reproduction](EPISODE-RECREATION.md).
++
++The 0.1.12 UI pass also passed its Shield navigation fixture, including ten injected D-pad moves. See [the scoped performance result](TV-UI-PERFORMANCE.md).
 +
 +These results establish the tested transitions and recovery behavior. They do not establish every add-on/source combination or HDR playback quality.
 +
@@ -12455,6 +12460,64 @@
 +- TMDB attribution/licensing: `https://developer.themoviedb.org/docs/faq` and `https://www.themoviedb.org/api-terms-of-use` — check current terms prior to implementation and release.
 +
 +*Verified baseline: DX.BI's published TV app is a WebView-based Stremio client with native Media3 playback, and its Windows client uses Electron. The backend, separated Stremio sessions, mobile app, and Netflix-aware recommendation workflow specified here are **requirements to build**, not features verified in upstream DX.BI.*
+--- /dev/null
++++ b/docs/household/TV-UI-PERFORMANCE.md
+@@ -0,0 +1,55 @@
++# TV navigation performance in 0.1.12
++
++This pass reduces remote-navigation work while catalogs load. It does not establish Netflix UI parity or a display-frame performance result.
++
++## Change
++
++Previously, a poster arriving in any catalog invalidated the complete navigation index. The next arrow press checked every poster again. The TV index now caches each track independently. Catalog arrivals invalidate the changed track. Resize, route changes, sorting, and settings changes clear the relevant caches. Watched-title visibility changes also invalidate their track.
++
++The cache uses weak keys so detached tracks do not become a permanent catalog registry. Focus behavior and source/player behavior remain covered separately.
++
++## Shield diagnostic result
++
++The controlled fixture contains 40 rows of 20 posters. Another poster arrives in the last row before each arrow press between the first two rows. Each run checks 30 expected focus moves, then verifies poster insertion/removal and whole-row insertion/removal. An additional check sends ten Android D-pad events through the displayed WebView.
++
++Five alternating baseline/candidate runs on the physical Shield produced:
++
++| Diagnostic | Baseline | Candidate |
++| --- | --- | --- |
++| Median of the five per-run median handler times | 9.9 ms | 5.1 ms |
++| Range of per-run medians | 9.5-10.2 ms | 4.9-5.2 ms |
++| Maximum visibility checks for a warm move | 870 | 90 |
++| Correct timed focus moves | 150/150 | 150/150 |
++| Catalog-change checks | 20/20 | 20/20 |
++
++The additional ten injected D-pad moves passed. The browser regression failed on the baseline because warm navigation exceeded the visibility-work budget, then passed after the change. A separate browser test covers visual CSS ordering, column changes, hidden posters, and watched-title visibility changes.
++
++These are measurements of JavaScript handler work in a diagnostic WebView build, with synthetic cards and no external network or artwork. They include DOM focus and synchronous scrolling, but exclude physical remote transport, image decode, subsequent rendering, and television presentation. They are not a claim of halved total input latency, improved FPS, or a Netflix comparison. Both sides execute inside the same app/WebView and alternate to limit drift. The limiting work addressed here is poster visibility scanning and navigation-index rebuilding; scrolling/layout and other UI handlers remain.
++
++The optimized app builds and launches. Running the existing instrumentation runner against its shrunk classes encountered test-runner dependency failures before the benchmark started. Those attempts supply no release timing evidence. The final installation uses the optimized `shield` variant.
++
++## Repeat the checks
++
++Preserve a baseline plugin before changing it. The public review snapshot at commit `fc4191e088135985eaa37d8cc21daf9a99fbe4c9` contains the baseline used here.
++
++```powershell
++node --test tools/household/tests/tv-navigation-performance.cjs
++node tools/household/benchmark-tv-navigation.cjs <baseline-plugin> dxbi.plugin.js
++node tools/household/benchmark-tv-navigation.cjs --prepare-android <baseline-plugin>
++```
++
++The preparation command writes only generated test assets under `tv/build/`. It does not change the installed app or include those assets in production APKs. Build the debug app and test APK, then install both with `adb install -r` using the same signing key. Do not clear viewer data or use a connected-test task that uninstalls the app.
++
++```powershell
++cd tv
++.\gradlew.bat assembleDebug assembleDebugAndroidTest
++adb -s <device> shell am instrument -w -e navigationBenchmark true -e class com.notdxbi.dxbi.tv.TvNavigationBenchmarkTest org.dxbi.household.android.test/androidx.test.runner.AndroidJUnitRunner
++```
++
++Without `navigationBenchmark=true`, the optional hardware benchmark skips before loading its generated assets. The fixture uses a separate reserved origin and never reads viewer accounts or playback URLs. The native episode-selection lifecycle regression and four series tests also passed on the Shield after the change. Android build/lint and all 18 browser episode/navigation checks passed.
++
++## Further UI acceptance
++
++The next measurements must cover launch to usable posters, real input to a presented focus frame, artwork loading during row movement, return-from-details focus and scroll restoration, and memory across long browsing/playback cycles. Track failures alongside timings. Use equivalent optimized artifacts for adoption decisions.
++
++The development repository's `TV-QUALITY-BASELINE.md` describes the broader measurement requirements. Its original device observations are historical, not the current installed version. HDR/Dolby Vision output remains a separate unresolved playback requirement.
 --- a/dxbi.plugin.js
 +++ b/dxbi.plugin.js
 @@ -1,6 +1,6 @@
@@ -12531,15 +12594,21 @@
      }
      return out;
    }
-@@ -348,6 +356,7 @@
+@@ -348,10 +356,13 @@
        Object.keys(DEFAULTS).map((key) => API.getSetting(key).then((v) => [key, v]).catch(() => [key, null]))
      );
      Object.assign(settings, normalise(Object.fromEntries(values)));
++    if (IN_TV) keyNav.tvInvalidate();
 +    applyAccent();
      persistSettings();
      builtInTheme.ensure();
      API.onSettingsSaved((all) => {
-@@ -367,6 +376,7 @@
+       Object.assign(settings, normalise(all));
++      if (IN_TV) keyNav.tvInvalidate();
+       persistSettings();
+       builtInTheme.ensure();
+       subtitlesStart.apply().catch(() => { /* core busy */ });
+@@ -367,6 +378,7 @@
    }
  
    function applyAccent() {
@@ -12547,7 +12616,7 @@
      const colour = ACCENTS[settings.accent] || ACCENTS.red;
      document.documentElement.style.setProperty("--dx-accent", colour);
    }
-@@ -818,7 +828,7 @@
+@@ -818,7 +830,7 @@
          <div class="dx-hero-slide" data-i="${i}">
            <div class="dx-hero-backdrop" style="background-image:url('${art.background(m.id)}')"></div>
            <div class="dx-hero-content">
@@ -12556,7 +12625,7 @@
              <img class="dx-hero-logo" src="${art.logo(m.id)}" alt="${esc(m.name)}" draggable="false">
              <div class="dx-hero-meta">${metaBits.join("")}</div>
              <p class="dx-hero-desc">${esc(m.description)}</p>
-@@ -948,7 +958,7 @@
+@@ -948,7 +960,7 @@
      const first = track.querySelector(':scope > [class*="meta-item"]');
      const step = first ? first.getBoundingClientRect().width : 200;
      const perPage = Math.max(1, Math.floor((track.clientWidth - 40) / step));
@@ -12565,7 +12634,31 @@
    }
  
    function measureRow(row) {
-@@ -1298,7 +1308,7 @@
+@@ -1122,7 +1134,10 @@
+       const href = row.querySelector('[class*="header-container"] a[href^="#/discover/"]')?.getAttribute("href");
+       const type = href ? decodeURIComponent(href.split("/")[3] || "") : "";
+       const hide = settings.videoRowsOnly && !!type && !VIDEO_TYPES.has(type.toLowerCase());
+-      if (row.classList.contains("dx-row-off") !== hide) row.classList.toggle("dx-row-off", hide);
++      if (row.classList.contains("dx-row-off") !== hide) {
++        row.classList.toggle("dx-row-off", hide);
++        if (IN_TV) keyNav.tvInvalidate();
++      }
+     }
+   }
+ 
+@@ -1220,7 +1235,10 @@
+       if (markWatched) {
+         // Continue Watching is never dimmed or hidden
+         const watched = !card.closest('[class*="continue-watching-row"]') && !!card.querySelector('[class*="watched-icon-layer"]');
+-        if (watched !== card.hasAttribute("data-dx-watched")) card.toggleAttribute("data-dx-watched", watched);
++        if (watched !== card.hasAttribute("data-dx-watched")) {
++          card.toggleAttribute("data-dx-watched", watched);
++          if (IN_TV && settings.watchedTitles === "hide") keyNav.tvInvalidate(card.closest('[class*="meta-items-container"]'));
++        }
+       }
+       const info = cardInfo(card);
+       const key = info ? `${info.type}:${info.id}` : "";
+@@ -1298,7 +1316,7 @@
      // The title the card is for is still the one in use: pointed at, or highlighted with the keyboard
      active(card) {
        if (!card.isConnected) return false;
@@ -12574,7 +12667,7 @@
        const at = document.activeElement;
        return card.contains(at) || (card === this.card && !!this.el && this.el.contains(at));
      },
-@@ -1318,10 +1328,11 @@
+@@ -1318,10 +1336,11 @@
        }
        if (open) clearTimeout(this.closeTimer);
        this.prepare(card);
@@ -12587,19 +12680,32 @@
      },
  
      // Do the heavy work while the pointer rests, before anything moves: the title's details,
-@@ -1721,7 +1732,193 @@
+@@ -1721,7 +1740,207 @@
      onKey: (e) => keyNav.key(e),
      onFocus: (e) => keyNav.focus(e),
  
 +    tvCache: null,
++    tvTracks: new WeakMap(),
 +    tvFramePending: false,
 +    tvFilterColumns: new WeakMap(),
++
++    tvInvalidate(track) {
++      this.tvCache = null;
++      if (track) this.tvTracks.delete(track);
++      else this.tvTracks = new WeakMap();
++    },
 +
 +    tvIndex() {
 +      if (this.tvCache && this.tvCache.hash === location.hash) return this.tvCache;
 +      const rows = [], positions = new WeakMap();
 +      for (const track of document.querySelectorAll('#app [class*="meta-items-container"]')) {
 +        if (!track.checkVisibility({ visibilityProperty: true, opacityProperty: true })) continue;
++        const cached = this.tvTracks.get(track);
++        if (cached) {
++          rows.push(cached);
++          cached.cards.forEach((card, index) => positions.set(card, { entry: cached, index }));
++          continue;
++        }
 +        const cards = [...track.children].filter(n => n.matches('[class*="meta-item-container"]') && n.checkVisibility({ visibilityProperty: true }));
 +        if (!cards.length) continue;
 +        const row = track.closest('[class*="meta-row-container"]');
@@ -12614,6 +12720,7 @@
 +        }
 +        const root = track.closest('[class*="library-content"], [class*="discover-content"]');
 +        const entry = { track, cards, row, root, columns, more: row?.querySelector('a[title="See All"], a[class*="see-all-container"]') };
++        this.tvTracks.set(track, entry);
 +        rows.push(entry);
 +        cards.forEach((card, index) => positions.set(card, { entry, index }));
 +      }
@@ -12738,7 +12845,7 @@
 +      if (!card && !more) return false;
 +      let cache = this.tvIndex();
 +      let at = card && cache.positions.get(card);
-+      if (card && !at) { this.tvCache = null; cache = this.tvIndex(); at = cache.positions.get(card); }
++      if (card && !at) { this.tvInvalidate(); cache = this.tvIndex(); at = cache.positions.get(card); }
 +      const entry = at?.entry || cache.rows.find(row => row.more === more);
 +      if (!entry) return false;
 +      const [dx, dy] = this.DIRS[e.key];
@@ -12781,7 +12888,7 @@
        if (e.key === "Escape" && this.on && preview.el && preview.el.contains(document.activeElement)) {
          this.fromPreview(document.activeElement, e);
          return;
-@@ -1742,7 +1939,7 @@
+@@ -1742,7 +1961,7 @@
        if (e.key === "Tab" || this.keeps(e.target, e.key)) return;
        // Start from the title the mouse was on, rather than wherever focus was left
        const focused = document.activeElement;
@@ -12790,7 +12897,7 @@
        if (hovered && !hovered.contains(focused) && (!focused || focused === document.body || focused.closest('[class*="meta-item-container"]'))) {
          if (this.go(hovered, e)) return;
        }
-@@ -1751,7 +1948,7 @@
+@@ -1751,7 +1970,7 @@
          this.fromPreview(focused, e);
          return;
        }
@@ -12799,7 +12906,7 @@
        // (or under the hover card) can still be reached. Everything else is Stremio's.
        const card = focused && focused.closest && focused.closest('#app [class*="meta-item-container"]');
        if (card) {
-@@ -1769,7 +1966,9 @@
+@@ -1769,7 +1988,9 @@
          // Nothing selected yet: start on the page itself (the billboard, or its first title), or in
          // whatever dialog is showing over it. Only what can actually be seen counts.
          const seen = this.onScreen(document.body);
@@ -12810,7 +12917,7 @@
            || seen.find((n) => n.closest('[class*="meta-item-container"]'))
            || seen.filter((n) => !n.closest('nav, [class*="horizontal-nav-bar"]'))
              .sort((a, b) => { const ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect(); return (ra.top + ra.left / 4) - (rb.top + rb.left / 4); })[0]
-@@ -1797,7 +1996,8 @@
+@@ -1797,7 +2018,8 @@
        next.focus({ preventScroll: true });
        // the billboard stays put; anything else slides into view only as far as needed
        // (a long list keeps its selection in the middle, so what comes next is always in sight)
@@ -12820,7 +12927,7 @@
      },
  
      // Items of one list (same kind, same parent, stacked one way): the next one, on screen or not.
-@@ -1809,6 +2009,8 @@
+@@ -1809,6 +2031,8 @@
        const k = kind(focused);
        if (!parent || !k) return undefined;
        const items = [...parent.children].filter((n) => n.checkVisibility());
@@ -12829,7 +12936,7 @@
        const i = items.indexOf(focused);
        if (items.length < 2 || i < 0 || items.some((n) => kind(n) !== k)) return undefined;
        const a = focused.getBoundingClientRect();
-@@ -1823,10 +2025,16 @@
+@@ -1823,10 +2047,16 @@
      onScreen(focused) {
        const sel = 'a[href], button:not([disabled]), input:not([type="hidden"]), select, textarea, [tabindex]:not([tabindex="-1"])';
        const out = [];
@@ -12847,7 +12954,7 @@
          const points = [[r.left + r.width / 2, r.top + r.height / 2], [r.left + 3, r.top + 3], [r.right - 3, r.bottom - 3]];
          if (points.some(([x, y]) => { const hit = document.elementFromPoint(x, y); return hit && (hit === n || n.contains(hit)); })) out.push(n);
        }
-@@ -2024,13 +2232,18 @@
+@@ -2024,13 +2254,18 @@
        const row = track && track.parentElement && track.parentElement.closest('[class*="meta-row-container"]');
        const carousel = row && [...carouselRows()].includes(row);
        if (carousel) {
@@ -12867,7 +12974,7 @@
              return;
            }
            this.go(next, e);
-@@ -2052,7 +2265,7 @@
+@@ -2052,7 +2287,7 @@
              e.preventDefault();
              e.stopImmediatePropagation();
              btn.focus({ preventScroll: true });
@@ -12876,7 +12983,7 @@
            }
          }
          return;
-@@ -2071,7 +2284,7 @@
+@@ -2071,7 +2306,7 @@
          const score = along + across * 2;
          if (score < bestScore) { bestScore = score; best = n; }
        }
@@ -12885,7 +12992,7 @@
      },
  
      // Into another row: the title nearest the one you were on, among those it shows
-@@ -2086,7 +2299,7 @@
+@@ -2086,7 +2321,7 @@
          for (const n of pool) if (Math.abs(this.rest(n).x - x) < Math.abs(this.rest(pick).x - x)) pick = n;
        }
        if (!this.go(pick, e)) return false;
@@ -12894,7 +13001,7 @@
        return true;
      },
  
-@@ -2105,7 +2318,7 @@
+@@ -2105,7 +2340,7 @@
      },
  
      // Whatever lights up under the mouse lights up the same way when the keyboard selects it:
@@ -12903,7 +13010,7 @@
      // styles already have theirs. Built once, the first time the keyboard is used.
      looks() {
        const sheets = [...document.styleSheets].filter((sh) => !(sh.ownerNode && /^dx-/.test(sh.ownerNode.id || "")));
-@@ -2165,6 +2378,9 @@
+@@ -2165,6 +2400,9 @@
        this.from = null;
        ensureExtrasStyle();
        this.looks();
@@ -12913,7 +13020,7 @@
        const el = document.createElement("div");
        el.className = "dx-keyshield";
        el.addEventListener("pointermove", (e) => {
-@@ -2576,7 +2792,7 @@
+@@ -2576,7 +2814,7 @@
            </div>`).join("")}
            ${tmdb.total > tmdb.reviews.length ? `<a class="dxr-link" href="${esc(tmdb.url)}" target="_blank" rel="noopener">All ${esc(tmdb.total)} reviews on TMDB</a>` : ""}</div>`);
        } else if (tmdb && tmdb.error) {
@@ -12922,7 +13029,7 @@
        } else if (tmdb) {
          parts.push(`<div class="dxe-section"><div class="dxe-label">Audience reviews</div><p class="dxr-note">No one has reviewed this on TMDB yet.</p></div>`);
        }
-@@ -2585,7 +2801,7 @@
+@@ -2585,7 +2823,7 @@
        const hints = [];
        if (!settings.tmdbKey.trim()) hints.push("a free TMDB key for audience reviews");
        if (!settings.mdblistKey.trim()) hints.push("a free MDBList key for audience and Letterboxd scores");
@@ -12931,7 +13038,7 @@
        const credits = [data.fromMdblist ? "Scores from MDBList" : scores.length ? "Scores from Wikidata" : "", wiki && wiki.text && wiki.text.length ? "Summary from Wikipedia (CC BY-SA)" : "", tmdb && tmdb.reviews ? "This product uses the TMDB API but is not endorsed or certified by TMDB" : ""].filter(Boolean);
        if (credits.length) parts.push(`<p class="dxr-credit">${credits.map(esc).join(" · ")}</p>`);
        return parts.join("");
-@@ -2927,7 +3143,7 @@
+@@ -2927,7 +3165,7 @@
  
      const fallback = () => {
        // Simple, compositor-only animation if video playback isn't available
@@ -12940,7 +13047,7 @@
        setTimeout(finish, 1700);
      };
  
-@@ -2937,14 +3153,20 @@
+@@ -2937,14 +3175,20 @@
      video.playsInline = true;
      video.preload = "auto";
      video.setAttribute("aria-hidden", "true");
@@ -12964,7 +13071,7 @@
      } catch (_) {
        fallback();
        return;
-@@ -2981,9 +3203,9 @@
+@@ -2981,9 +3225,9 @@
      // The player keeps Stremio's own title: other plugins read it to label the stream
      if (currentRoute() === "player") return;
      const current = document.title || "";
@@ -12976,7 +13083,7 @@
    }
  
    // ---------------------------------------------------------------------------
-@@ -3013,9 +3235,11 @@
+@@ -3013,9 +3257,11 @@
    ];
    const QUALITY_LABEL = { 2160: "4K", 1440: "1440p", 1080: "1080p", 720: "720p", 480: "SD", 0: "Unknown" };
    const SOURCE_RANK = { Remux: 4, BluRay: 3, WEB: 2, HDTV: 1, Other: 0, CAM: -10 };
@@ -12989,7 +13096,7 @@
      ["seeds", "Most seeds"],
      ["size-desc", "Largest first"],
      ["size-asc", "Smallest first"],
-@@ -3068,7 +3292,7 @@
+@@ -3068,7 +3314,7 @@
    const streamTools = {
      cache: new WeakMap(),
      state: (() => {
@@ -12998,7 +13105,7 @@
        try { return { ...base, ...JSON.parse(localStorage.getItem("dxbi.streams") || "{}") }; } catch (_) { return base; }
      })(),
      open: null,
-@@ -3168,9 +3392,18 @@
+@@ -3168,9 +3414,18 @@
        s.instant = saved.instant && f.instant > 0;
        s.hdr = saved.hdr && f.hdr > 0;
  
@@ -13019,7 +13126,7 @@
          seeds: (a, b) => b.d.seeds - a.d.seeds || this.score(b.d) - this.score(a.d),
          "size-desc": (a, b) => b.d.size - a.d.size,
          "size-asc": (a, b) => (a.d.size || Infinity) - (b.d.size || Infinity),
-@@ -3187,10 +3420,10 @@
+@@ -3187,10 +3442,10 @@
        // restore the user's full saved preferences (we only narrowed them for this title)
        Object.assign(this.state, saved);
  
@@ -13032,7 +13139,7 @@
        }
  
        let empty = list.parentElement.querySelector(":scope > .dx-stream-empty");
-@@ -3233,7 +3466,7 @@
+@@ -3233,7 +3488,7 @@
        if (f.hdr && f.hdr < total) html += `<button type="button" class="dx-sb-btn dx-sb-toggle${s.hdr ? " is-on" : ""}" data-toggle="hdr">HDR / DV</button>`;
        const filtered = active.quality.length || active.lang.length || active.source.length || active.provider.length || s.instant || s.hdr;
        html += `<span class="dx-sb-count">${shown === total ? `${total} streams` : `${shown} of ${total}`}</span>`;
@@ -13041,7 +13148,7 @@
        html += `</div>`;
  
        if (this.open) {
-@@ -3260,7 +3493,7 @@
+@@ -3260,7 +3515,7 @@
          s[t.dataset.toggle] = !s[t.dataset.toggle];
          sfx.play(s[t.dataset.toggle] ? "toggleOn" : "toggleOff");
        } else if (t.dataset.act === "reset") {
@@ -13050,7 +13157,7 @@
          this.open = null;
          sfx.play("tick", 1.2);
        } else if (t.dataset.val !== undefined) {
-@@ -3295,6 +3528,94 @@
+@@ -3295,6 +3550,94 @@
      if (reset) streamTools.onClick({ target: reset, preventDefault() {}, stopPropagation() {} });
      else streamTools.closeMenu(e);
    }
@@ -13145,7 +13252,7 @@
  
    // ---------------------------------------------------------------------------
    // Seek bar: Netflix-style hover preview (thumbnail + time), hover fill, time remaining
-@@ -6100,7 +6421,7 @@
+@@ -6100,7 +6443,7 @@
      const steps = IN_TV
        ? [updateRoute, brandTitle, () => addonTools.ensure(), communitySync]
        : [updateRoute, brandTitle, () => player.ensure(), () => { convert.ensure().catch(() => { /* player state not ready */ }); }, () => convert.confirmHevc(), () => externalDefault.ensure(), () => placeholder.ensure(), () => playbackHelp.ensure(), () => scrub.ensure(), () => enhance.ensure(), () => watchParty.ensure(), () => skip.ensure(), () => tune.ensure(), () => streamInfo.ensure(), () => addonTools.ensure(), communitySync];
@@ -13154,25 +13261,37 @@
      steps.push(() => reviews.ensure());
      if (currentRoute() !== "player") {
        steps.push(() => hero.ensure(), filterRows, updateAllArrows, syncCards, () => librarySort.ensure(), applyWatchedTitles);
-@@ -6112,6 +6433,9 @@
+@@ -6112,6 +6455,14 @@
    }
  
    const mo = new MutationObserver((records) => {
-+    if (IN_TV && records.some(r => r.target instanceof Element &&
-+      (r.target.matches('[class*="meta-items-container"]') || [...r.addedNodes, ...r.removedNodes].some(n =>
-+        n instanceof Element && (n.matches('[class*="meta-row-container"], [class*="meta-items-container"]') || n.querySelector('[class*="meta-items-container"]')))))) keyNav.tvCache = null;
++    if (IN_TV) for (const record of records) {
++      if (record.target instanceof Element && record.target.matches('[class*="meta-items-container"]')) keyNav.tvInvalidate(record.target);
++      for (const node of [...record.addedNodes, ...record.removedNodes]) {
++        if (!(node instanceof Element)) continue;
++        if (node.matches('[class*="meta-items-container"]')) keyNav.tvInvalidate(node);
++        for (const track of node.querySelectorAll('[class*="meta-items-container"]')) keyNav.tvInvalidate(track);
++      }
++    }
      for (const r of records) {
        // Ignore changes we made ourselves
        if (r.target.closest && r.target.closest(".dx-hero, .dx-preview, .dx-row-pages, .dxe-airing, .dxe-upnext, .dxe-playhelp, .dxe-placeholder, .dxe-skip, .dxe-trailer, .dx-wide-art, .dx-player-title, .dx-player-flash, .dx-streambar, .dx-stream-empty, .dx-scrub, .dx-enhance-subs, .dx-player-toast, .dxp-nav-btn, .dxp-player-btn, .dxt-panel, .dx-sub2, .dxl-tools, .dxe-theatre, .dx-scores, .dx-reviews-btn")) continue;
-@@ -6121,6 +6445,7 @@
+@@ -6121,12 +6472,13 @@
    });
  
    const onResize = () => {
-+    keyNav.tvCache = null;
++    keyNav.tvInvalidate();
      preview.close(true);
      updateAllArrows();
    };
-@@ -6303,6 +6628,10 @@
+   const onOver = (e) => preview.onOver(e);
+   const onOut = (e) => preview.onOut(e);
+-  const onHash = () => { updateRoute(); scheduleSync(); };
++  const onHash = () => { if (IN_TV) keyNav.tvInvalidate(); updateRoute(); scheduleSync(); };
+   const onTitle = new MutationObserver(brandTitle);
+ 
+   // ---------------------------------------------------------------------------
+@@ -6303,6 +6655,10 @@
    .dx-preview-media.has-trailer .dxe-trailer-sound { opacity: 1; }
    .dxe-trailer-sound:hover, .dxe-trailer-sound:focus-visible { background: rgba(0,0,0,.7); border-color: #fff; }
    .dxe-trailer-sound svg { width: 1.05rem; height: 1.05rem; }
@@ -13183,7 +13302,7 @@
  
    .dxe-trailer-full { position: absolute; z-index: 3; right: 3.1rem; bottom: .6rem; width: 2.1rem; height: 2.1rem; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 1px solid rgba(255,255,255,.5); background: rgba(0,0,0,.45); color: #fff; cursor: pointer; opacity: 0; transition: opacity .3s, background-color .15s, border-color .15s, transform .15s; }
    .dx-preview-media.has-trailer .dxe-trailer-full { opacity: 1; }
-@@ -6550,7 +6879,7 @@
+@@ -6550,7 +6906,7 @@
    // answer is yes, the streaming server passes HEVC through untouched, and 10-bit / Dolby Vision
    // releases then fail on PCs that can't decode them ("Video is not supported", common on Windows 10).
    // Stremio's player has a built-in fallback, ?forceTranscoding, which makes the server convert to
@@ -13192,7 +13311,7 @@
    // whenever a video fails.
    const HEVC_HINT = /\b(?:x\.?265|h\.?265|hevc|10[ -]?bit|dovi|dv|dolby[ .-]?vision|hdr(?:10\+?)?)\b/i;
    const convert = {
-@@ -6989,8 +7318,8 @@
+@@ -6989,8 +7345,8 @@
        const chrome = (/Chrome\/([\d.]+)/.exec(ua) || [])[1];
        const hevc = convert.hevc === null ? "not checked" : convert.hevc ? "yes" : "no";
        return [
@@ -13203,7 +13322,7 @@
          `Streaming server ${r.server || "?"} · transcode profile: ${r.profile || "Disabled"} · hw accel: ${r.hwAccel}`,
          `Converted: ${convert.active()} · 10-bit HEVC decoding: ${hevc}`,
          `File: ${r.format || "?"} · ${(r.streams || []).join(", ") || r.probe || "?"}`,
-@@ -7276,7 +7605,7 @@
+@@ -7276,7 +7632,7 @@
    // ---- Addon order & backup (Addons page)
  
    // Home rows come from catalog addons on your Stremio account, so a fresh install looks bare next
@@ -13212,7 +13331,7 @@
    const HOME_PACK = [
      { name: "The Movie Database", what: "popular, trending and latest movies & series", url: "https://94c8cb9f702d-tmdb-addon.baby-beamup.club/%7B%22language%22%3A%22en-US%22%7D/manifest.json" },
      { name: "Streaming Catalogs", what: "Netflix, Disney+, HBO Max, Prime Video and Apple TV+ rows", url: "https://7a82163c306e-stremio-netflix-catalog-addon.baby-beamup.club/manifest.json" },
-@@ -7327,7 +7656,7 @@
+@@ -7327,7 +7683,7 @@
              <button class="dxe-btn" data-act="export">Back up</button>
              <button class="dxe-btn" data-act="import">Restore…</button>
              ${this.lastBackup() ? '<button class="dxe-btn" data-act="undo">Undo last change</button>' : ""}
@@ -13221,7 +13340,7 @@
              <span class="dxe-spacer"></span>
              <button class="dxe-btn" data-act="close">Close</button>
              <button class="dxe-btn is-primary" data-act="save" disabled>Save order</button>
-@@ -7483,10 +7812,10 @@
+@@ -7483,10 +7839,10 @@
        }
        try { localStorage.setItem("dxbi.packOffered", "1"); } catch (_) { /* ignore */ }
        const list = missing.map((p) => `• ${p.name}: ${p.what}`).join("\n");
@@ -13234,7 +13353,7 @@
      },
  
      // Replace the account's addon collection, keeping the previous one so it can be undone
-@@ -7519,7 +7848,7 @@
+@@ -7519,7 +7875,7 @@
      },
  
      exportFile() {
@@ -13243,7 +13362,7 @@
        const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
        const a = Object.assign(document.createElement("a"), { href: url, download: `stremio-addons-${new Date().toISOString().slice(0, 10)}.json` });
        document.body.append(a);
-@@ -7548,7 +7877,7 @@
+@@ -7548,7 +7904,7 @@
    };
  
    // ---------------------------------------------------------------------------
@@ -13252,7 +13371,7 @@
    // file next to its settings (dxbi-data.plugin.json), so it survives Stremio clearing its
    // storage. localStorage holds a copy for instant reads; the newer copy of each section wins.
    // ---------------------------------------------------------------------------
-@@ -7689,10 +8018,10 @@
+@@ -7689,10 +8045,10 @@
      managing: false,
      confirming: null,
  
@@ -13265,7 +13384,7 @@
        const { getState } = core();
        try {
          // Accounts with Stremio's own profiles get Stremio's profile lock screen instead
-@@ -8039,7 +8368,7 @@
+@@ -8039,7 +8395,7 @@
  
        return `
          <div class="dxe-head">
@@ -13274,7 +13393,7 @@
            ${viewers.list().list.length > 1 ? '<button class="dxe-btn" data-act="who">Switch viewer</button>' : ""}
            <button class="dxe-btn" data-act="close">Close</button>
          </div>
-@@ -8063,7 +8392,7 @@
+@@ -8063,7 +8419,7 @@
                </div>
              </div>
            </div>
@@ -13283,7 +13402,7 @@
          </div>`;
      },
    };
-@@ -8071,15 +8400,19 @@
+@@ -8071,15 +8427,19 @@
    // Entries in Stremio's profile menu (top right)
    const navMenu = {
      ensure() {
@@ -13305,7 +13424,7 @@
          item.addEventListener("click", (e) => {
            e.preventDefault();
            e.stopPropagation();
-@@ -8091,7 +8424,8 @@
+@@ -8091,7 +8451,8 @@
        };
        const items = [];
        if (settings.watchStats) items.push(make("Your stats", ICONS.chart, () => statsPanel.open()));
@@ -13315,7 +13434,7 @@
        template.before(...items);
      },
    };
-@@ -8238,7 +8572,7 @@
+@@ -8238,7 +8599,7 @@
            <div class="dxe-head"><b>Keyboard shortcuts<small>Press ? any time to open this list</small></b><button class="dxe-btn" data-act="close">Close</button></div>
            <div class="dxe-keys">${SHORTCUTS.map(([group, rows]) => `
              <div class="dxe-section"><div class="dxe-label">${esc(group)}</div>
@@ -13324,7 +13443,7 @@
              </div>`).join("")}
            </div>
          </div>`;
-@@ -8496,11 +8830,13 @@
+@@ -8496,11 +8857,13 @@
        this.stop();
        if (!settings.trailers) return;
        this.token = token;
@@ -13339,7 +13458,7 @@
      },
  
      start(el, id) {
-@@ -8518,10 +8854,11 @@
+@@ -8518,10 +8881,11 @@
        sound.innerHTML = this.muted ? ICONS.muted : ICONS.sound;
        sound.addEventListener("click", (e) => {
          e.stopPropagation();
@@ -13354,7 +13473,7 @@
        const full = document.createElement("button");
        full.className = "dxe-trailer-full";
        full.setAttribute("aria-label", "Watch trailer full screen");
-@@ -8539,6 +8876,15 @@
+@@ -8539,6 +8903,15 @@
  
      command(func) {
        try { this.frame && this.frame.contentWindow.postMessage(JSON.stringify({ event: "command", func, args: [] }), "*"); } catch (_) { /* gone */ }
@@ -13370,7 +13489,7 @@
      },
  
      // Carry on watching the hover card's trailer full screen, from the same moment, with sound
-@@ -8599,7 +8945,7 @@
+@@ -8599,7 +8972,7 @@
  
  
    // ---------------------------------------------------------------------------
@@ -13379,7 +13498,7 @@
    // ---------------------------------------------------------------------------
  
    const theatre = {
-@@ -8621,7 +8967,7 @@
+@@ -8621,7 +8994,7 @@
            src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}?autoplay=1&mute=0&controls=0&disablekb=1&fs=0&iv_load_policy=3&cc_load_policy=0&modestbranding=1&playsinline=1&rel=0&enablejsapi=1&start=${start}&origin=${encodeURIComponent(location.origin)}"></iframe></div>
          <div class="dxe-th-shade"></div>
          <div class="dxe-th-top">
@@ -13388,7 +13507,7 @@
            <button class="dxe-th-icon" data-th="close" aria-label="Close trailer" data-tip="Close (Esc)">${ICONS.close}</button>
          </div>
          <div class="dxe-th-bottom">
-@@ -9206,7 +9552,7 @@
+@@ -9206,7 +9579,7 @@
  
    // Where the picture is inside the player: `frame` is the whole video frame (it reaches past the
    // edges when zoomed or cropped), `visible` the part you can see. Follows Stremio's own
@@ -13397,7 +13516,7 @@
    function pictureBox(v) {
      const box = v.getBoundingClientRect();
      const host = v.parentElement.getBoundingClientRect();
-@@ -10392,6 +10738,9 @@
+@@ -10392,6 +10765,9 @@
    const LIB_ORDERS = { new: "Newest", old: "Oldest", rated: "Top rated" };
  
    const librarySort = {
@@ -13407,7 +13526,7 @@
      info: new Map(), // "type:id" → { year, rating, genres }
      key: "",
  
-@@ -10401,7 +10750,7 @@
+@@ -10401,7 +10777,7 @@
      },
  
      ensure() {
@@ -13416,7 +13535,7 @@
        const inputs = lib && lib.querySelector('[class*="selectable-inputs-container"]');
        if (!inputs) return;
        let tools = lib.querySelector(".dxl-tools");
-@@ -10453,9 +10802,24 @@
+@@ -10453,9 +10829,24 @@
        const p = this.prefs();
        const ids = cards.map((c) => { const i = cardInfo(c); return i ? `${i.type}:${i.id}` : ""; });
        const key = `${p.order}|${p.genre}|${ids.join(",")}|${this.info.size}`;
@@ -13443,7 +13562,7 @@
        const missing = ids.filter((k) => k && !this.info.has(k));
        if (missing.length) {
          for (const k of missing) this.info.set(k, null);
-@@ -10475,8 +10839,12 @@
+@@ -10475,8 +10866,12 @@
        }
        const known = ids.map((k) => this.info.get(k) || { year: 0, rating: 0, genres: [] });
        const genres = [...new Set(known.flatMap((x) => x.genres))].sort((a, b) => a.localeCompare(b));
@@ -13458,20 +13577,20 @@
        lib.classList.toggle("dxl-sorted", !!p.order);
        const rank = cards.map((c, i) => i);
        if (p.order) {
-@@ -10493,14 +10861,20 @@
+@@ -10493,14 +10888,20 @@
        cards.forEach((c, i) => {
          c.style.order = p.order ? String(pos.get(i)) : "";
          c.classList.toggle("dxl-off", !!p.genre && !known[i].genres.includes(p.genre));
 +        this.appliedCards.add(c);
        });
-+      if (IN_TV) keyNav.tvCache = null;
++      if (IN_TV) keyNav.tvInvalidate();
      },
  
      reset(lib) {
        if (!lib) return;
        lib.classList.remove("dxl-sorted");
        lib.querySelectorAll('[class*="meta-item-container"]').forEach((c) => { c.style.order = ""; c.classList.remove("dxl-off"); });
-+      if (IN_TV) keyNav.tvCache = null;
++      if (IN_TV) keyNav.tvInvalidate();
        this.key = "";
 +      this.lastPrefs = null;
 +      this.pendingRefresh = false;
@@ -13479,7 +13598,7 @@
      },
    };
  
-@@ -10563,8 +10937,8 @@
+@@ -10563,8 +10964,8 @@
      builtInTheme.ensure();
    });
  
@@ -13490,7 +13609,7 @@
    // theme, takes over from it.
    const builtInTheme = {
      el: null,
-@@ -10587,7 +10961,7 @@
+@@ -10587,7 +10988,7 @@
          this.el.id = "dx-builtin-theme";
          this.el.textContent = bundledThemeCss();
        }
@@ -13499,7 +13618,7 @@
        const first = document.head.querySelector('style[id^="dx-"]:not(#dx-builtin-theme)');
        if (this.el.parentNode !== document.head || (first && this.el.compareDocumentPosition(first) & Node.DOCUMENT_POSITION_PRECEDING)) {
          document.head.insertBefore(this.el, first || null);
-@@ -10604,7 +10978,7 @@
+@@ -10604,7 +11005,7 @@
    function start() {
      // Windows needs a few rendering workarounds in the theme (see "WINDOWS" there)
      if (/Windows/i.test(navigator.userAgent)) document.documentElement.classList.add("dx-win");
@@ -13508,7 +13627,7 @@
      if (IN_TV) document.documentElement.classList.add("dx-tv");
      // loadSettings applies the cached settings synchronously, so the intro sees the right accent/sound
      const loading = loadSettings();
-@@ -10658,7 +11032,7 @@
+@@ -10658,7 +11059,7 @@
      sfx,
      convert,
      streamInfo,
@@ -13517,7 +13636,7 @@
      closePreview() {
        if (!preview.el || !preview.el.classList.contains("is-open")) return false;
        const card = preview.card;
-@@ -10771,10 +11145,15 @@
+@@ -10771,10 +11172,15 @@
    // ---------------------------------------------------------------------------
    // Generated from dxbi.theme.css by tools/bundle-theme.mjs: edit the theme, then run it
    function bundledThemeCss() {
@@ -17363,6 +17482,114 @@
 +        print("backup_operation_failed", file=sys.stderr)
 +        sys.exit(1)
 --- /dev/null
++++ b/tools/household/benchmark-tv-navigation.cjs
+@@ -0,0 +1,105 @@
++const assert = require('node:assert/strict');
++const fs = require('node:fs');
++const path = require('node:path');
++const { chromium } = require('../../app/node_modules/playwright');
++
++function setupFixture() {
++      localStorage.setItem('dxbi.settings', JSON.stringify({ billboard: false, builtInTheme: false, previews: false, ratings: false, newEpisodes: false, uiSounds: false, splash: false, reviews: false, airing: false }));
++      sessionStorage.setItem('dxbi.splash', '1');
++      document.head.insertAdjacentHTML('beforeend', `<style>body{margin:0;background:#111;color:white}#app{height:720px;overflow:auto}.board-content-fixture{padding:20px}.meta-row-container{height:180px;position:relative}.meta-items-container{display:flex;overflow:auto;gap:10px}.meta-item-container{flex:0 0 130px;height:140px}.meta-item-link{display:block;width:130px;height:140px;background:#333}.meta-item-link:focus{outline:3px solid white}.dx-arrow,.dx-row-pages{display:none}</style>`);
++      window.makeCard = (r, c) => {const n=document.createElement('div');n.className='meta-item-container';n.innerHTML=`<a class="meta-item-link" href="#/detail/movie/fixture-${r}-${c}" tabindex="0"><div class="poster-container"></div><span class="title-label">Fixture ${r}-${c}</span></a>`;return n};
++      const app=document.createElement('div');app.id='app';const board=document.createElement('div');board.className='board-content-fixture';app.append(board);document.body.append(app);
++      for(let r=0;r<40;r++){const row=document.createElement('div');row.className='meta-row-container';const track=document.createElement('div');track.className='meta-items-container';for(let c=0;c<20;c++)track.append(window.makeCard(r,c));row.append(track);board.append(row)}
++      location.hash='#/';
++      const visibility=Element.prototype.checkVisibility;
++      const rect=Element.prototype.getBoundingClientRect;
++      window.work={visibility:0,rect:0};
++      Element.prototype.checkVisibility=function(...args){window.work.visibility++;return visibility.apply(this,args)};
++      Element.prototype.getBoundingClientRect=function(...args){window.work.rect++;return rect.apply(this,args)};
++}
++
++async function runNavigationSample() {
++      const tracks=[...document.querySelectorAll('.meta-items-container')];
++      tracks[0].querySelector('a').focus({preventScroll:true});
++      const samples=[];
++      for(let n=0;n<30;n++){
++        // An unrelated catalog receives another poster while the viewer browses.
++        tracks[39].append(window.makeCard(39,20+n));
++        await new Promise(resolve=>queueMicrotask(resolve));
++        work.visibility=0;work.rect=0;
++        const start=performance.now();
++        document.activeElement.dispatchEvent(new KeyboardEvent('keydown',{key:n%2?'ArrowUp':'ArrowDown',bubbles:true,cancelable:true}));
++        const elapsed=performance.now()-start;
++        const row=tracks.findIndex(t=>t.contains(document.activeElement));
++        if(row!==(n%2?0:1))throw Error('Unexpected focus row '+row);
++        samples.push({ms:elapsed,...work});
++        await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
++      }
++      const cards=document.querySelectorAll('.meta-item-container').length;
++      const press=async(key,expected)=>{
++        await new Promise(resolve=>queueMicrotask(resolve));
++        document.activeElement.dispatchEvent(new KeyboardEvent('keydown',{key,bubbles:true,cancelable:true}));
++        if(document.activeElement!==expected)throw Error('Focus did not follow catalog changes');
++        await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
++      };
++      const originalLast=tracks[0].lastElementChild.querySelector('a');
++      const added=window.makeCard(0,20);tracks[0].append(added);
++      originalLast.focus({preventScroll:true});
++      await press('ArrowRight',added.querySelector('a'));
++      const preceding=tracks[0].children[18].querySelector('a');
++      tracks[0].children[19].remove();
++      await press('ArrowLeft',preceding);
++      // An entire row arriving between existing rows must change vertical navigation.
++      const row=document.createElement('div');row.className='meta-row-container';
++      const track=document.createElement('div');track.className='meta-items-container';
++      track.append(window.makeCard(99,0));row.append(track);tracks[0].parentElement.after(row);
++      tracks[0].firstElementChild.querySelector('a').focus({preventScroll:true});
++      await press('ArrowDown',track.querySelector('a'));
++      tracks[0].firstElementChild.querySelector('a').focus({preventScroll:true});row.remove();
++      await press('ArrowDown',tracks[1].firstElementChild.querySelector('a'));
++      return {samples,acceptedMoves:samples.length,failures:0,cards,catalogChangeChecks:4};
++}
++
++// Controlled catalog-arrival workload. No account, media, or external network access.
++async function measure(browser, source) {
++  const page = await browser.newPage({ viewport: { width: 1280, height: 720 }, userAgent: 'Chrome/155 dxbi-tv/1' });
++  try {
++    await page.route('**/*', route => route.fulfill({ contentType: 'text/html', body: '<html><head><title>Fixture</title></head><body></body></html>' }));
++    await page.goto('https://fixture.invalid/');
++    await page.evaluate(setupFixture);
++    await page.addScriptTag({content: source});
++    await page.waitForTimeout(300);
++    const result = await page.evaluate(runNavigationSample);
++    assert.equal(result.acceptedMoves,30); assert.equal(result.cards,830);
++    return result;
++  } finally { await page.close(); }
++}
++async function main() {
++  if (process.argv[2] === '--prepare-android') {
++    assert(process.argv[3], 'Supply the baseline plugin path');
++    const out=path.resolve(__dirname,'../../tv/build/generated/navigationBenchmark');
++    fs.mkdirSync(out,{recursive:true});
++    fs.writeFileSync(path.join(out,'navigation-fixture.html'),fixtureHtml());
++    fs.copyFileSync(path.resolve(process.argv[3]),path.join(out,'baseline.plugin.js'));
++    console.log('Prepared isolated Android benchmark assets');
++    return;
++  }
++  const baseline = process.argv[2];
++  assert(baseline, 'Usage: node tools/household/benchmark-tv-navigation.cjs <baseline-plugin> [candidate-plugin]');
++  const candidate = process.argv[3];
++  const browser=await chromium.launch({headless:true});
++  try {
++    for(let run=0;run<5;run++)for(const [variant,file] of [['baseline',baseline],...(candidate?[['candidate',candidate]]:[])]){
++      const result=await measure(browser,fs.readFileSync(path.resolve(file),'utf8'));
++      const sorted=result.samples.map(s=>s.ms).sort((a,b)=>a-b);
++      console.log(JSON.stringify({variant,run,acceptedMoves:result.acceptedMoves,failures:result.failures,cards:result.cards,medianHandlerMs:sorted[15],maxVisibilityChecks:Math.max(...result.samples.map(s=>s.visibility)),meanVisibilityChecks:result.samples.reduce((sum,s)=>sum+s.visibility,0)/30}));
++    }
++  } finally {await browser.close()}
++}
++if(require.main===module)main().catch(e=>{console.error(e.message);process.exitCode=1});
++function fixtureHtml() {
++  return '<!doctype html><html><head><title>Navigation benchmark</title></head><body><script>('
++    + setupFixture.toString() + ')();</script><script src="https://fixture.invalid/plugin.js"></script><script>window.runNavigationSample='
++    + runNavigationSample.toString() + ';window.fixtureReady=true;</script></body></html>';
++}
++module.exports={measure,fixtureHtml};
+--- /dev/null
 +++ b/tools/household/check-js.cjs
 @@ -0,0 +1,10 @@
 +const {spawnSync}=require('node:child_process');
@@ -18055,7 +18282,7 @@
 +DOCS = {
 +    'SPEC.md', 'DECISIONS.md', 'OPERATIONS.md', 'PRIVACY.md', 'ANDROID-TV.md',
 +    'ANDROID-TV-ENTERPRISE-PLAYER-RESEARCH.md', 'FORK-ADDITIONS.md', 'SHARING.md', 'ACCEPTANCE.md',
-+    'EPISODE-RECREATION.md',
++    'EPISODE-RECREATION.md', 'TV-UI-PERFORMANCE.md',
 +}
 +RULES = {
 +    'user-path': re.compile(r'(?i)[a-z]:[\\/]+(?:Users|Dev)[\\/]+[^\s\"\'<>`]+'),
@@ -18542,6 +18769,65 @@
 +
 +if __name__ == '__main__':
 +    unittest.main()
+--- /dev/null
++++ b/tools/household/tests/tv-navigation-performance.cjs
+@@ -0,0 +1,56 @@
++const test=require('node:test');
++const assert=require('node:assert/strict');
++const fs=require('node:fs');
++const path=require('node:path');
++const {chromium}=require('../../../app/node_modules/playwright');
++const {measure}=require('../benchmark-tv-navigation.cjs');
++test('late catalog posters preserve correct remote focus without rescanning the full catalog',async()=>{
++ const browser=await chromium.launch({headless:true});
++ try{
++  const result=await measure(browser,fs.readFileSync(path.resolve('dxbi.plugin.js'),'utf8'));
++  assert.equal(result.failures,0);
++  assert.equal(result.acceptedMoves,30);
++  const warm=result.samples.slice(1);
++  assert(Math.max(...warm.map(s=>s.visibility))<150,'A poster arriving in one row must not require checking visibility of all 800 posters on the next arrow press');
++ }finally{await browser.close()}
++});
++
++test('TV grid focus follows visual sorting, resized columns and hidden posters',async()=>{
++ const {fixtureHtml}=require('../benchmark-tv-navigation.cjs');
++ const browser=await chromium.launch({headless:true});
++ const page=await browser.newPage({viewport:{width:1280,height:720},userAgent:'Chrome/155 dxbi-tv/1'});
++ try{
++  const plugin=fs.readFileSync(path.resolve('dxbi.plugin.js'),'utf8');
++  await page.route('**/*',route=>route.fulfill({contentType:route.request().url().endsWith('/plugin.js')?'application/javascript':'text/html',body:route.request().url().endsWith('/plugin.js')?plugin:fixtureHtml()}));
++  await page.goto('https://fixture.invalid/');
++  await page.waitForFunction(()=>window.fixtureReady);
++  await page.waitForTimeout(300);
++  await page.evaluate(async()=>{
++   document.querySelector('.board-content-fixture').style.display='none';
++   const root=document.createElement('div');root.className='discover-content-fixture';
++   const track=document.createElement('div');track.className='meta-items-container';track.style.cssText='flex-wrap:wrap;width:560px;overflow:visible';
++   for(let i=0;i<16;i++){const card=makeCard(98,i);card.style.order=String(15-i);track.append(card)}
++   root.append(track);document.querySelector('#app').append(root);location.hash='#/discover/movie/fixture';
++   const press=async expected=>{
++    track.children[15].querySelector('a').focus({preventScroll:true});
++    document.activeElement.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowDown',bubbles:true,cancelable:true}));
++    if(document.activeElement!==track.children[expected].querySelector('a'))throw Error('Visual grid position was not preserved');
++    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
++   };
++   await new Promise(resolve=>setTimeout(resolve,100));
++   await press(11);
++   track.style.width='420px';window.dispatchEvent(new Event('resize'));
++   await press(12);
++   track.children[12].style.display='none';window.dispatchEvent(new Event('resize'));
++   await press(11);
++   document.head.insertAdjacentHTML('beforeend','<style>.dx-watched-hide [data-dx-watched]{display:none}</style>');
++   track.children[12].style.display='';window.dispatchEvent(new Event('resize'));
++   await press(12);
++   const watched=document.createElement('span');watched.className='watched-icon-layer';track.children[12].append(watched);
++   window.__dxbi.settings.watchedTitles='hide';window.__dxbi.sync();
++   await press(11);
++   watched.remove();window.__dxbi.sync();
++   await press(12);
++  });
++ }finally{await browser.close()}
++});
 --- a/tools/intro_audio.py
 +++ b/tools/intro_audio.py
 @@ -10,7 +10,8 @@
@@ -18703,8 +18989,8 @@
 -        versionName = dxbiVersion
 -        versionCode = versionParts[0] * 10000 + versionParts[1] * 100 + versionParts[2]
 +        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-+        versionName = "0.1.11-local-tv"
-+        versionCode = 12
++        versionName = "0.1.12-local-tv"
++        versionCode = 13
      }
  
      signingConfigs {
@@ -18722,7 +19008,12 @@
      }
  
      compileOptions {
-@@ -63,10 +71,14 @@
+@@ -59,14 +67,19 @@
+     }
+ 
+     // The built-in dx.bi plugin is the one at the repository root, copied in at build time
++    sourceSets["androidTest"].assets.srcDir(rootProject.layout.buildDirectory.dir("generated/navigationBenchmark"))
+     sourceSets["main"].assets.srcDir(layout.buildDirectory.dir("generated/dxbiAssets"))
  }
  
  val copyPlugin by tasks.registering(Copy::class) {
@@ -18739,7 +19030,7 @@
  
  dependencies {
      implementation("androidx.core:core-ktx:1.15.0")
-@@ -78,4 +90,8 @@
+@@ -78,4 +91,8 @@
      implementation("androidx.media3:media3-ui:1.5.1")
      implementation("androidx.media3:media3-datasource-okhttp:1.5.1")
      implementation("com.squareup.okhttp3:okhttp:4.12.0")
@@ -19465,6 +19756,111 @@
 +            instrumentation.sendKeySync(KeyEvent(down, SystemClock.uptimeMillis(), KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DPAD_CENTER, 0))
 +            assertTrue("The offset shows, sped up", waitFor(2_000) { find(scenario, "Subtitles 1.6 s later") != null })
 +        } finally { scenario.close() }
++    }
++}
+--- /dev/null
++++ b/tv/app/src/androidTest/java/com/notdxbi/dxbi/tv/TvNavigationBenchmarkTest.kt
+@@ -0,0 +1,102 @@
++package com.notdxbi.dxbi.tv
++
++import android.os.Bundle
++import android.os.SystemClock
++import android.view.KeyEvent
++import android.webkit.WebResourceRequest
++import android.webkit.WebResourceResponse
++import android.webkit.WebView
++import android.webkit.WebViewClient
++import androidx.test.core.app.ActivityScenario
++import androidx.test.ext.junit.runners.AndroidJUnit4
++import androidx.test.platform.app.InstrumentationRegistry
++import org.json.JSONObject
++import org.junit.Assert.*
++import org.junit.Assume.assumeTrue
++import org.junit.Test
++import org.junit.runner.RunWith
++import java.io.ByteArrayInputStream
++import java.util.concurrent.CountDownLatch
++import java.util.concurrent.TimeUnit
++
++/** Opt-in fixture benchmark. Never reads or changes viewer accounts or media state. */
++@RunWith(AndroidJUnit4::class)
++class TvNavigationBenchmarkTest {
++    @Test fun catalogArrivalKeepsNavigationWorkLocalToTheChangedRow() {
++        val instrumentation = InstrumentationRegistry.getInstrumentation()
++        assumeTrue(InstrumentationRegistry.getArguments().getString("navigationBenchmark") == "true")
++        val fixture = instrumentation.context.assets.open("navigation-fixture.html").bufferedReader().use { it.readText() }
++        val scenario = ActivityScenario.launch(HouseholdActivity::class.java)
++        lateinit var web: WebView
++        fun js(code: String): String {
++            val latch = CountDownLatch(1)
++            var result = ""
++            instrumentation.runOnMainSync { web.evaluateJavascript(code) { result = it; latch.countDown() } }
++            assertTrue("JavaScript reply timed out", latch.await(10, TimeUnit.SECONDS))
++            return result
++        }
++        try {
++            scenario.onActivity { activity ->
++                web = WebView(activity)
++                web.settings.javaScriptEnabled = true
++                web.settings.domStorageEnabled = true
++                web.settings.userAgentString += " dxbi-tv/benchmark"
++                activity.setContentView(web)
++                web.requestFocus()
++            }
++            for (run in 0 until 5) for (variant in listOf("baseline", "candidate")) {
++                val loaded = CountDownLatch(1)
++                instrumentation.runOnMainSync {
++                    web.webViewClient = object : WebViewClient() {
++                        override fun onPageFinished(view: WebView?, url: String?) { loaded.countDown() }
++                        override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest): WebResourceResponse {
++                            val stream = if (request.url.toString() == "https://fixture.invalid/plugin.js") {
++                                if (variant == "baseline") instrumentation.context.assets.open("baseline.plugin.js")
++                                else instrumentation.targetContext.assets.open("dxbi.plugin.js")
++                            } else ByteArrayInputStream(ByteArray(0))
++                            return WebResourceResponse("application/javascript", "UTF-8", stream)
++                        }
++                    }
++                    web.loadDataWithBaseURL("https://fixture.invalid/", fixture, "text/html", "UTF-8", null)
++                }
++                assertTrue("Fixture document must finish loading", loaded.await(15, TimeUnit.SECONDS))
++                val readyDeadline = SystemClock.uptimeMillis() + 15000
++                while (js("Boolean(window.fixtureReady)") != "true" && SystemClock.uptimeMillis() < readyDeadline) Thread.sleep(50)
++                assertEquals("Fixture must load", "true", js("Boolean(window.fixtureReady)"))
++                Thread.sleep(300)
++                js("window.benchmarkResult=null;window.benchmarkError=null;runNavigationSample().then(r=>window.benchmarkResult=r).catch(e=>window.benchmarkError=e.message);void 0")
++                val deadline = SystemClock.uptimeMillis() + 15000
++                while (js("Boolean(window.benchmarkResult||window.benchmarkError)") != "true" && SystemClock.uptimeMillis() < deadline) Thread.sleep(100)
++                assertEquals("Focus must remain correct", "null", js("window.benchmarkError"))
++                val raw = js("JSON.stringify(window.benchmarkResult)")
++                assertNotEquals("Benchmark must complete", "null", raw)
++                val result = JSONObject(org.json.JSONTokener(raw).nextValue() as String)
++                val samples = result.getJSONArray("samples")
++                val times = (0 until samples.length()).map { samples.getJSONObject(it).getDouble("ms") }.sorted()
++                val warmChecks = (1 until samples.length()).map { samples.getJSONObject(it).getInt("visibility") }
++                assertEquals(30, result.getInt("acceptedMoves"))
++                assertEquals(830, result.getInt("cards"))
++                assertEquals(4, result.getInt("catalogChangeChecks"))
++                if (variant == "candidate") assertTrue("An unrelated poster must not rescan the whole catalog", warmChecks.max() < 150)
++                val summary = JSONObject().put("variant", variant).put("run", run)
++                    .put("acceptedMoves", 30).put("failures", 0).put("medianHandlerMs", times[15])
++                    .put("warmMaxVisibilityChecks", warmChecks.max()).put("catalogChangeChecks", 4)
++                instrumentation.sendStatus(0, Bundle().apply { putString("stream", "[navigation-benchmark] $summary\n") })
++            }
++            js("document.querySelector('.meta-items-container a').focus({preventScroll:true});void 0")
++            for (move in 0 until 10) {
++                js("{const tracks=document.querySelectorAll('.meta-items-container');tracks[39].append(makeCard(39,100+$move));}void 0")
++                instrumentation.sendKeyDownUpSync(if (move % 2 == 0) KeyEvent.KEYCODE_DPAD_DOWN else KeyEvent.KEYCODE_DPAD_UP)
++                val expected = if (move % 2 == 0) 1 else 0
++                val code = "[...document.querySelectorAll('.meta-items-container')].findIndex(t=>t.contains(document.activeElement))"
++                val focusDeadline = SystemClock.uptimeMillis() + 2000
++                while (js(code) != expected.toString() && SystemClock.uptimeMillis() < focusDeadline) Thread.sleep(20)
++                assertEquals("Injected D-pad must move focus to the intended catalog row", expected.toString(), js(code))
++            }
++            instrumentation.sendStatus(0, Bundle().apply { putString("stream", "[navigation-benchmark] nativeDpadMoves=10 failures=0\n") })
++        } finally {
++            instrumentation.runOnMainSync { web.destroy() }
++            scenario.close()
++        }
 +    }
 +}
 --- /dev/null

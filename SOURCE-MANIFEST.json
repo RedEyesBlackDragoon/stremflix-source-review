@@ -5,11 +5,11 @@
   "runtimeDataIncluded": false,
   "workflowsIncluded": false,
   "credentialAndPersonalPatternFindings": 0,
-  "sourceFiles": 276,
+  "sourceFiles": 280,
   "changes": {
     "modified": 51,
     "unchanged": 105,
-    "added": 120
+    "added": 124
   },
   "files": [
     {
@@ -735,8 +735,8 @@
     {
       "path": "docs/household/ACCEPTANCE.md",
       "status": "added",
-      "sha256": "8ffbafd46527e5934688c0efa4c401abaf7618ccba550a6c13d2c81bfa77ac5b",
-      "bytes": 1339
+      "sha256": "9c0ddc3b28d3278c1decd9db2625a3f3e1f2403c062cc46326e246e1e1216402",
+      "bytes": 1637
     },
     {
       "path": "docs/household/ANDROID-TV-ENTERPRISE-PLAYER-RESEARCH.md",
@@ -765,8 +765,8 @@
     {
       "path": "docs/household/FORK-ADDITIONS.md",
       "status": "added",
-      "sha256": "98780f9584fb9ed1c827f734abe9185fb933ef252164e733f86e0cf128d712ac",
-      "bytes": 9069
+      "sha256": "86145dc661fe20472e9c2a81fc78d87d737289b75d95b752c18c72814897b41e",
+      "bytes": 9584
     },
     {
       "path": "docs/household/OPERATIONS.md",
@@ -793,10 +793,16 @@
       "bytes": 37798
     },
     {
+      "path": "docs/household/TV-UI-PERFORMANCE.md",
+      "status": "added",
+      "sha256": "0d2c7f9391b9f5aae684f1a52ddd933f1a062c68b1cf875c770473d6289ee5b8",
+      "bytes": 4769
+    },
+    {
       "path": "dxbi.plugin.js",
       "status": "modified",
-      "sha256": "cc76a3f271dcc8918fc8337beeae0a8de81b2495b994533040514130b6b629bd",
-      "bytes": 1794914
+      "sha256": "dfe4d8e9257beb180103e8e2fe8823061c190c392c61152224a7683239ec2415",
+      "bytes": 1795843
     },
     {
       "path": "dxbi.theme.css",
@@ -1189,6 +1195,12 @@
       "bytes": 3483
     },
     {
+      "path": "tools/household/benchmark-tv-navigation.cjs",
+      "status": "added",
+      "sha256": "0c3467d7b05d5f5acff1a89c482fab993712bd1eaa532f01e1ce8a9bbb6b1075",
+      "bytes": 7417
+    },
+    {
       "path": "tools/household/check-js.cjs",
       "status": "added",
       "sha256": "f431234d029edb6de1f5e0226333a3ba8b359be9232de28f8015af75a909437f",
@@ -1269,8 +1281,8 @@
     {
       "path": "tools/household/prepare-share.py",
       "status": "added",
-      "sha256": "68a302fdb98ce1d77342dad94de0780c40e1f1f69dba7b0e86d40c4e5dfb3d8a",
-      "bytes": 9406
+      "sha256": "b2e3af0886b5d9a58df4ce813c80977c53531fb99a8f65ddc4b3076762dffaa9",
+      "bytes": 9430
     },
     {
       "path": "tools/household/review-tv-navigation.cjs",
@@ -1295,6 +1307,12 @@
       "status": "added",
       "sha256": "6aa1cbe51070da9f8f48b6cabc155196d34cbd53f029d3742663fe83f10d9102",
       "bytes": 2352
+    },
+    {
+      "path": "tools/household/tests/tv-navigation-performance.cjs",
+      "status": "added",
+      "sha256": "92617619240f63ecff84eb2afb7a32d4ffa51b6b9dde093ffb800a97aa1c78cd",
+      "bytes": 3399
     },
     {
       "path": "tools/intro_audio.py",
@@ -1335,8 +1353,8 @@
     {
       "path": "tv/app/build.gradle.kts",
       "status": "modified",
-      "sha256": "b1e27011a622bf6f630802b139a7c3029b47c4659483d09345ba2f3604cc1cdb",
-      "bytes": 3991
+      "sha256": "332d8be30463f3ab26325e08a32942e7b778362c918b556fbe6eb1d2bc414683",
+      "bytes": 4107
     },
     {
       "path": "tv/app/proguard-rules.pro",
@@ -1397,6 +1415,12 @@
       "status": "added",
       "sha256": "69f2858c3de3a40cb02c3b06529025bed8d0021d6ab18130d69961547ed256fe",
       "bytes": 9270
+    },
+    {
+      "path": "tv/app/src/androidTest/java/com/notdxbi/dxbi/tv/TvNavigationBenchmarkTest.kt",
+      "status": "added",
+      "sha256": "cbcb2177ba8b643ba8ab315204a07c0f3580fcfb082a154b16254640c2e66182",
+      "bytes": 6571
     },
     {
       "path": "tv/app/src/androidTest/java/com/notdxbi/dxbi/tv/TvRemoteRepeatTest.kt",

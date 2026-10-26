@@ -356,11 +356,13 @@
       Object.keys(DEFAULTS).map((key) => API.getSetting(key).then((v) => [key, v]).catch(() => [key, null]))
     );
     Object.assign(settings, normalise(Object.fromEntries(values)));
+    if (IN_TV) keyNav.tvInvalidate();
     applyAccent();
     persistSettings();
     builtInTheme.ensure();
     API.onSettingsSaved((all) => {
       Object.assign(settings, normalise(all));
+      if (IN_TV) keyNav.tvInvalidate();
       persistSettings();
       builtInTheme.ensure();
       subtitlesStart.apply().catch(() => { /* core busy */ });
@@ -1132,7 +1134,10 @@
       const href = row.querySelector('[class*="header-container"] a[href^="#/discover/"]')?.getAttribute("href");
       const type = href ? decodeURIComponent(href.split("/")[3] || "") : "";
       const hide = settings.videoRowsOnly && !!type && !VIDEO_TYPES.has(type.toLowerCase());
-      if (row.classList.contains("dx-row-off") !== hide) row.classList.toggle("dx-row-off", hide);
+      if (row.classList.contains("dx-row-off") !== hide) {
+        row.classList.toggle("dx-row-off", hide);
+        if (IN_TV) keyNav.tvInvalidate();
+      }
     }
   }
 
@@ -1230,7 +1235,10 @@
       if (markWatched) {
         // Continue Watching is never dimmed or hidden
         const watched = !card.closest('[class*="continue-watching-row"]') && !!card.querySelector('[class*="watched-icon-layer"]');
-        if (watched !== card.hasAttribute("data-dx-watched")) card.toggleAttribute("data-dx-watched", watched);
+        if (watched !== card.hasAttribute("data-dx-watched")) {
+          card.toggleAttribute("data-dx-watched", watched);
+          if (IN_TV && settings.watchedTitles === "hide") keyNav.tvInvalidate(card.closest('[class*="meta-items-container"]'));
+        }
       }
       const info = cardInfo(card);
       const key = info ? `${info.type}:${info.id}` : "";
@@ -1733,14 +1741,27 @@
     onFocus: (e) => keyNav.focus(e),
 
     tvCache: null,
+    tvTracks: new WeakMap(),
     tvFramePending: false,
     tvFilterColumns: new WeakMap(),
+
+    tvInvalidate(track) {
+      this.tvCache = null;
+      if (track) this.tvTracks.delete(track);
+      else this.tvTracks = new WeakMap();
+    },
 
     tvIndex() {
       if (this.tvCache && this.tvCache.hash === location.hash) return this.tvCache;
       const rows = [], positions = new WeakMap();
       for (const track of document.querySelectorAll('#app [class*="meta-items-container"]')) {
         if (!track.checkVisibility({ visibilityProperty: true, opacityProperty: true })) continue;
+        const cached = this.tvTracks.get(track);
+        if (cached) {
+          rows.push(cached);
+          cached.cards.forEach((card, index) => positions.set(card, { entry: cached, index }));
+          continue;
+        }
         const cards = [...track.children].filter(n => n.matches('[class*="meta-item-container"]') && n.checkVisibility({ visibilityProperty: true }));
         if (!cards.length) continue;
         const row = track.closest('[class*="meta-row-container"]');
@@ -1755,6 +1776,7 @@
         }
         const root = track.closest('[class*="library-content"], [class*="discover-content"]');
         const entry = { track, cards, row, root, columns, more: row?.querySelector('a[title="See All"], a[class*="see-all-container"]') };
+        this.tvTracks.set(track, entry);
         rows.push(entry);
         cards.forEach((card, index) => positions.set(card, { entry, index }));
       }
@@ -1879,7 +1901,7 @@
       if (!card && !more) return false;
       let cache = this.tvIndex();
       let at = card && cache.positions.get(card);
-      if (card && !at) { this.tvCache = null; cache = this.tvIndex(); at = cache.positions.get(card); }
+      if (card && !at) { this.tvInvalidate(); cache = this.tvIndex(); at = cache.positions.get(card); }
       const entry = at?.entry || cache.rows.find(row => row.more === more);
       if (!entry) return false;
       const [dx, dy] = this.DIRS[e.key];
@@ -6433,9 +6455,14 @@
   }
 
   const mo = new MutationObserver((records) => {
-    if (IN_TV && records.some(r => r.target instanceof Element &&
-      (r.target.matches('[class*="meta-items-container"]') || [...r.addedNodes, ...r.removedNodes].some(n =>
-        n instanceof Element && (n.matches('[class*="meta-row-container"], [class*="meta-items-container"]') || n.querySelector('[class*="meta-items-container"]')))))) keyNav.tvCache = null;
+    if (IN_TV) for (const record of records) {
+      if (record.target instanceof Element && record.target.matches('[class*="meta-items-container"]')) keyNav.tvInvalidate(record.target);
+      for (const node of [...record.addedNodes, ...record.removedNodes]) {
+        if (!(node instanceof Element)) continue;
+        if (node.matches('[class*="meta-items-container"]')) keyNav.tvInvalidate(node);
+        for (const track of node.querySelectorAll('[class*="meta-items-container"]')) keyNav.tvInvalidate(track);
+      }
+    }
     for (const r of records) {
       // Ignore changes we made ourselves
       if (r.target.closest && r.target.closest(".dx-hero, .dx-preview, .dx-row-pages, .dxe-airing, .dxe-upnext, .dxe-playhelp, .dxe-placeholder, .dxe-skip, .dxe-trailer, .dx-wide-art, .dx-player-title, .dx-player-flash, .dx-streambar, .dx-stream-empty, .dx-scrub, .dx-enhance-subs, .dx-player-toast, .dxp-nav-btn, .dxp-player-btn, .dxt-panel, .dx-sub2, .dxl-tools, .dxe-theatre, .dx-scores, .dx-reviews-btn")) continue;
@@ -6445,13 +6472,13 @@
   });
 
   const onResize = () => {
-    keyNav.tvCache = null;
+    keyNav.tvInvalidate();
     preview.close(true);
     updateAllArrows();
   };
   const onOver = (e) => preview.onOver(e);
   const onOut = (e) => preview.onOut(e);
-  const onHash = () => { updateRoute(); scheduleSync(); };
+  const onHash = () => { if (IN_TV) keyNav.tvInvalidate(); updateRoute(); scheduleSync(); };
   const onTitle = new MutationObserver(brandTitle);
 
   // ---------------------------------------------------------------------------
@@ -10863,14 +10890,14 @@
         c.classList.toggle("dxl-off", !!p.genre && !known[i].genres.includes(p.genre));
         this.appliedCards.add(c);
       });
-      if (IN_TV) keyNav.tvCache = null;
+      if (IN_TV) keyNav.tvInvalidate();
     },
 
     reset(lib) {
       if (!lib) return;
       lib.classList.remove("dxl-sorted");
       lib.querySelectorAll('[class*="meta-item-container"]').forEach((c) => { c.style.order = ""; c.classList.remove("dxl-off"); });
-      if (IN_TV) keyNav.tvCache = null;
+      if (IN_TV) keyNav.tvInvalidate();
       this.key = "";
       this.lastPrefs = null;
       this.pendingRefresh = false;

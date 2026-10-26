@@ -26,8 +26,8 @@ android {
         minSdk = 24
         targetSdk = 35
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        versionName = "0.1.11-local-tv"
-        versionCode = 12
+        versionName = "0.1.12-local-tv"
+        versionCode = 13
     }
 
     signingConfigs {
@@ -67,6 +67,7 @@ android {
     }
 
     // The built-in dx.bi plugin is the one at the repository root, copied in at build time
+    sourceSets["androidTest"].assets.srcDir(rootProject.layout.buildDirectory.dir("generated/navigationBenchmark"))
     sourceSets["main"].assets.srcDir(layout.buildDirectory.dir("generated/dxbiAssets"))
 }
 

@@ -17,6 +17,7 @@ The standalone local mode keeps profile management on the device. Its Android TV
 | Desktop local profiles | Persistent Electron session partitions and a local profile controller/store alongside the optional server-backed launcher | `app/src/household/` |
 | Profile switching | Profile controls in the Stremio header and return to the picker without requiring a new Stremio sign-in | `MainActivity.kt`, `tv/app/src/main/assets/dxbi-tv.js` |
 | Android TV browsing | A cached row/grid index, direct row movement, visible CSS sort order, retained grid columns, See All navigation, and navigation through both Library filter rows | `dxbi.plugin.js` |
+| Catalog loading during navigation | Cache each TV track independently so a late poster does not trigger a full-catalog visibility scan on the next arrow press | `dxbi.plugin.js`, [measurements](TV-UI-PERFORMANCE.md) |
 | Held remote input | Repeated-key coalescing, an intentional transition from the top Library row to its filters, and deferred background sorting while the grid has focus | `dxbi.plugin.js` |
 | TV rendering defaults | Fast TV browsing mode, instant navigation scrolling, fewer automatic visual/audio effects, and delayed previews after a title remains selected | `dxbi.plugin.js`, `dxbi.theme.css` |
 | Native player series controls | Episodes panel, season navigation, Next Episode, Up Next, and binge-watching settings passed from Stremio | `SeriesPlayback.kt`, `PlayerActivity.kt`, `dxbi-tv.js` |
@@ -58,7 +59,9 @@ The original dx.bi plugin, theme, desktop application foundation, Android shell/
 
 ## Validation and known gaps
 
-Android builds and lint passed during development. All 16 browser episode-routing checks and five native series/lifecycle tests passed on the emulator. The lifecycle regression also passed on a physical Shield. It destroys the browsing activity while episode 10 is open, then selects episode 9 through the native Episodes panel. The same test failed against the previous APK at the expected episode-9 assertion. See [the lifecycle fix and reproduction](EPISODE-RECREATION.md).
+Android builds and lint passed during development. All 16 browser episode-routing checks passed. Five native series/lifecycle tests passed on the emulator and physical Shield. Two additional browser tests cover navigation work, visual sorting, resized grids, and watched-title visibility. The lifecycle regression also passed on a physical Shield. It destroys the browsing activity while episode 10 is open, then selects episode 9 through the native Episodes panel. The same test failed against the previous APK at the expected episode-9 assertion. See [the lifecycle fix and reproduction](EPISODE-RECREATION.md).
+
+The 0.1.12 UI pass also passed its Shield navigation fixture, including ten injected D-pad moves. See [the scoped performance result](TV-UI-PERFORMANCE.md).
 
 These results establish the tested transitions and recovery behavior. They do not establish every add-on/source combination or HDR playback quality.
 
