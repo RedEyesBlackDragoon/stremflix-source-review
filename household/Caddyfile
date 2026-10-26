@@ -1,0 +1,7 @@
+{$PUBLIC_HOST} {
+    header Strict-Transport-Security "max-age=31536000"
+    request_body {
+        max_size 6MB
+    }
+    reverse_proxy api:8080
+}

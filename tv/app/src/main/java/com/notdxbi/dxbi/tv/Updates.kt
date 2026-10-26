@@ -1,0 +1,123 @@
+package com.notdxbi.dxbi.tv
+
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
+import android.provider.Settings
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.core.content.FileProvider
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import org.json.JSONObject
+import java.io.File
+import java.util.concurrent.TimeUnit
+import kotlin.concurrent.thread
+
+/**
+ * Keeps Stremflix current on the TV:
+ *  - the Stremflix plugin updates itself between app releases, like it does on a computer: a newer copy
+ *    is fetched in the background and used from the next launch
+ *  - a new Stremflix TV release is offered once, and downloaded and installed when wanted
+ */
+object Updates {
+    private const val PLUGIN_URL = "https://raw.githubusercontent.com/notdxbi/dxbi-stremio/main/dxbi.plugin.js"
+    private const val RELEASES_URL = "https://api.github.com/repos/notdxbi/dxbi-stremio/releases/latest"
+    private const val APK_ASSET = "dxbi-tv.apk"
+    private const val UPDATED_PLUGIN = "dxbi.plugin.js"
+
+    private val http by lazy {
+        OkHttpClient.Builder().connectTimeout(15, TimeUnit.SECONDS).readTimeout(60, TimeUnit.SECONDS).build()
+    }
+
+    /** The plugin to run: the bundled one, or a newer one fetched earlier */
+    fun pluginSource(context: Context): String {
+        val bundled = context.assets.open("dxbi.plugin.js").bufferedReader().use { it.readText() }
+        val updated = File(context.filesDir, UPDATED_PLUGIN)
+        if (updated.exists()) {
+            val text = updated.readText()
+            if (isNewer(version(text), version(bundled))) return text
+            updated.delete() // the app itself has caught up
+        }
+        return bundled
+    }
+
+    fun checkPlugin(context: Context) = thread(name = "dxbi-plugin-update") {
+        try {
+            val text = get(PLUGIN_URL) ?: return@thread
+            if (!text.contains("@name Stremflix")) return@thread
+            if (isNewer(version(text), version(pluginSource(context)))) File(context.filesDir, UPDATED_PLUGIN).writeText(text)
+        } catch (_: Exception) { /* offline: try again next launch */ }
+    }
+
+    fun checkApp(activity: MainActivity) = thread(name = "dxbi-app-update") {
+        try {
+            val release = JSONObject(get(RELEASES_URL) ?: return@thread)
+            val latest = release.optString("tag_name").removePrefix("v")
+            val current = BuildConfigVersion.name(activity)
+            if (!isNewer(latest, current)) return@thread
+            val prefs = activity.getSharedPreferences("updates", Context.MODE_PRIVATE)
+            if (prefs.getString("skipped", null) == latest) return@thread
+            val assets = release.optJSONArray("assets") ?: return@thread
+            val url = (0 until assets.length()).map { assets.getJSONObject(it) }
+                .firstOrNull { it.optString("name") == APK_ASSET }?.optString("browser_download_url") ?: return@thread
+            activity.runOnUiThread {
+                if (activity.isFinishing) return@runOnUiThread
+                AlertDialog.Builder(activity)
+                    .setTitle("Stremflix $latest is out")
+                    .setMessage("You have $current. Update now? It downloads in the background, then Android asks you to install it.")
+                    .setPositiveButton("Update") { _, _ -> download(activity, url) }
+                    .setNegativeButton("Not now", null)
+                    .setNeutralButton("Skip this version") { _, _ -> prefs.edit().putString("skipped", latest).apply() }
+                    .show()
+            }
+        } catch (_: Exception) { /* offline: try again next launch */ }
+    }
+
+    private fun download(activity: MainActivity, url: String) {
+        // Android only installs apps from Stremflix once it's allowed to ("Install unknown apps")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !activity.packageManager.canRequestPackageInstalls()) {
+            Toast.makeText(activity, "Allow Stremflix to install apps, then choose Update again", Toast.LENGTH_LONG).show()
+            activity.startActivity(Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:${activity.packageName}")))
+            return
+        }
+        Toast.makeText(activity, "Downloading the update…", Toast.LENGTH_SHORT).show()
+        thread(name = "dxbi-apk-download") {
+            try {
+                val dir = File(activity.cacheDir, "updates").apply { mkdirs() }
+                val apk = File(dir, APK_ASSET)
+                http.newCall(Request.Builder().url(url).build()).execute().use { response ->
+                    if (!response.isSuccessful) throw IllegalStateException("HTTP ${response.code}")
+                    apk.outputStream().use { out -> response.body!!.byteStream().copyTo(out) }
+                }
+                val uri = FileProvider.getUriForFile(activity, "${activity.packageName}.updates", apk)
+                activity.runOnUiThread {
+                    activity.startActivity(Intent(Intent.ACTION_VIEW)
+                        .setDataAndType(uri, "application/vnd.android.package-archive")
+                        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK))
+                }
+            } catch (e: Exception) {
+                activity.runOnUiThread { Toast.makeText(activity, "The update couldn't be downloaded (${e.message})", Toast.LENGTH_LONG).show() }
+            }
+        }
+    }
+
+    private fun get(url: String): String? =
+        http.newCall(Request.Builder().url(url).header("User-Agent", "dxbi-tv").build()).execute().use { r ->
+            if (r.isSuccessful) r.body?.string() else null
+        }
+
+    private fun version(source: String): String = Regex("""@version\s+([\d.]+)""").find(source)?.groupValues?.get(1) ?: "0"
+
+    fun isNewer(candidate: String, current: String): Boolean {
+        val a = candidate.split(".").map { it.toIntOrNull() ?: 0 }
+        val b = current.split(".").map { it.toIntOrNull() ?: 0 }
+        for (i in 0 until maxOf(a.size, b.size)) {
+            val x = a.getOrElse(i) { 0 }
+            val y = b.getOrElse(i) { 0 }
+            if (x != y) return x > y
+        }
+        return false
+    }
+}

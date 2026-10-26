@@ -1,0 +1,1 @@
+document.querySelector('form').addEventListener('submit',async event=>{event.preventDefault();const error=document.querySelector('#error');error.textContent='Connecting…';try{await window.HouseholdNative.setServer(new FormData(event.target).get('server'));}catch{error.textContent='Could not connect. Use a reachable HTTPS Household server or localhost for development.';}});

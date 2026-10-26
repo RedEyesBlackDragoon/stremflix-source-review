@@ -1,0 +1,11 @@
+<resources>
+    <style name="Theme.Dxbi" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@color/background</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="colorAccent">@color/accent</item>
+    </style>
+    <style name="Theme.Dxbi.Player">
+        <item name="android:windowBackground">@android:color/black</item>
+    </style>
+</resources>

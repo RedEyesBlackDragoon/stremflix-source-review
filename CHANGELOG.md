@@ -1,0 +1,195 @@
+# Changelog
+
+## 2.14.3
+- **"Play in external player" works.** Choosing VLC (or mpv / IINA on a Mac) under Stremio's Settings → Player now opens streams straight in that player, including Play, Continue Watching and the next episode. Before, the video started in the built-in player instead, and you had to wait for it to fail and press VLC every time.
+- **Popups are a single card.** Every popup (updates, addons, plugin settings) drew a second, inset card inside the first, which looked cut off at the sides.
+- **The app's update popup stays away after Ignore.** It used to come back on every launch, whatever you clicked (#6). It also no longer offers an update before its download is ready, which made Download fetch the version you already had.
+- **"Check for updates" in the app's settings works.** Whenever an update existed, it said the check failed and to check your internet connection.
+
+## 2.14.2
+- **Smoother playback on Macs.** When a Mac can't play a file as it is, Stremio's streaming server converts it while you watch. It checks that the Mac's hardware video encoder works, but then kept converting on the processor anyway, which can't keep up with 4K HEVC releases on many Macs, so the video stuttered and froze. dx.bi now switches the hardware encoder on, once (you can still change it under Settings → Streaming → Transcode profile).
+- After one HEVC release failed to play, dx.bi converted every HEVC release from then on, even when the failed file was simply broken. It now only does that once a converted copy has actually played.
+
+## 2.14.1
+- **No more double title bar in the dx.bi app.** On first launch, copying a Stremio Enhanced setup that had window transparency switched on gave the window its normal title bar plus a second one inside the page. The page now follows the window, and transparency isn't copied over (dx.bi's look isn't made for a see-through window).
+- **A simpler install guide.** One-click downloads for Windows, Mac, Linux and TVs, with each step a newcomer meets on the way, including the security prompts Windows and macOS show.
+- The app's downloads now have the same name in every release, so the links never change.
+
+## 2.14.0
+- **dx.bi TV.** dx.bi for Android TV and Google TV, made for the remote: the arrows move around, OK opens, Back goes back. Streams play in a TV player that handles MKV, HEVC, HDR and surround sound, with your addons' subtitles, and your watch progress is shared with every other Stremio app. dx.bi's settings have their own remote-friendly screen under Settings. It updates itself, and offers new versions of the app.
+- With nothing selected yet, the first arrow press starts on what's actually showing, including a dialog over the page.
+
+## 2.13.0
+- **The dx.bi app.** dx.bi now also comes as its own desktop app for Windows, macOS and Linux, with everything built in: download, open, sign in. It's built on Stremio Enhanced, so it does everything Stremio Enhanced does. The first time it opens, it offers to copy your Stremio Enhanced sign-in, library, settings and plugins over. It downloads and updates Stremio's streaming server by itself, and its Discord status says "Watching dx.bi" with a link to get it.
+- **Keyboard browsing.** Get around everything with the arrow keys. The pointer hides while you do, the title you land on previews just like a hovered one, and rows turn to their next page at the edge. Press ↓ on a preview to reach its buttons. Stremio's top bar, settings switches and player buttons, which the keyboard couldn't reach before, now can. Moving the mouse hands control straight back.
+- **Keyboard in the player.** Enter steps into the controls and menus (speed, subtitles, audio and the rest), the arrows move between them, and Esc steps back out.
+- **No more square outlines.** Whatever the keyboard selects looks the same as when the mouse points at it.
+- The billboard no longer slides up when you move between Play and More Info, and holds still while one of them is selected.
+- Every player button and icon is the same size.
+- Hover cards open with corners that match the posters exactly.
+
+## 2.11.0
+- **Reviews on title pages.** Rotten Tomatoes and Metacritic scores now sit beside the IMDb rating, and a new *Reviews* button opens the critics' summary from Wikipedia, with a link to read more. No account or setup needed.
+- **Optional free keys add more.** A TMDB key adds audience reviews; an MDBList key adds fresher scores, including Rotten Tomatoes audience, Letterboxd and Trakt. Paste them in dx.bi's settings. Each key is only sent to its own service.
+
+## 2.10.7
+- **Hover cards stay open after scrolling a row.** Once a row had been scrolled with the arrows or the wheel, pointing at a title made its card pop open and snap shut straight away.
+- Releases now ship just the plugin and the installers; the theme is built into the plugin.
+
+## 2.10.6
+- **Every player button says what it is.** Hover any of Stremio's own player buttons (speed, cast, subtitles, audio, episodes, statistics, more options, back) and it shows its name.
+- **No more giant arrow over the video on Windows.** The player's top-bar icons always stay small and let clicks through to the video.
+
+## 2.10.5
+- **Rows fade softly into the screen edges.** Titles that slide aside for a hover card, or peek in from a scrolled row, now fade out at the edge of the screen instead of being sliced off.
+- **Continue Watching stays calm.** Its cards no longer open a hover card; they lift gently and show play and the remove tab.
+
+## 2.10.4
+- **Hover cards open without a single stutter.** Measured on a 165 Hz screen, the opening used to start with frames of 117, 45 and 40 ms; now every frame is about 6 ms. The causes, all fixed:
+  - Several theme rules made the browser restyle the whole page whenever anything was hovered or added (`body:has(...)`, and `:hover`/`:focus` rules followed by `[class*=...]`). Hover effects now use variables set on the hovered element itself, and the plugin marks rows and cards with plain attributes instead of `:has()`.
+  - The title's details and artwork are now fetched and decoded while the pointer rests, before anything moves, and the row is measured before the animation starts.
+  - The poster no longer fades early, which briefly showed the layer underneath.
+- **Titles cut off by the edge of the screen stay in their row:** no hover card pops out over the edge. Titles at either end of the screen grow inwards from their own edge.
+- New screenshots and hover animation in the README.
+
+## 2.10.3
+- **Hover cards unfold smoothly.** The card opens out from the poster's own outline, with a soft glow in the title's colours, and the titles either side glide aside to make room (and back when it closes). Moving along a row, each card now opens exactly over its title instead of drifting.
+- **Trailers full screen.** While a hover card's trailer plays, the new full-screen button carries on from the same moment, with sound, in dx.bi's own player: title art, Play and More info, pause, mute and a seek bar that fade away when the mouse is still. Esc closes it; Space, M and the arrow keys work too.
+- **Continue Watching remove button.** It no longer hides under the "+N new episodes" badge (the badge steps aside on hover), and it's now a slim tab that opens out into *Remove*. Pointing at it never opens the hover card, and hover cards for Continue Watching titles have their own remove button.
+- **Fixed a title's hover card sometimes not opening again** after you moved away while it was loading.
+
+## 2.10.2
+- **No more "streaming server isn't running" by mistake.** When a converted video failed, dx.bi could wrongly say the server wasn't running: it gave up after 2.5 seconds while the server was busy, or checked again when Stremio redrew its error box. It now waits longer, asks twice, and keeps the first answer it worked out.
+- **Better advice for Windows error 3221225781.** The missing file isn't Media Foundation, as 2.9.6 said: Stremio Enhanced's own ffprobe only needs files every Windows has. The fix is Stremio Service, re-downloading ffmpeg/ffprobe, or updating a copy of ffmpeg you installed yourself (Stremio Enhanced uses it first).
+- *Copy details* now includes the Windows build and processor type.
+
+## 2.10.1
+- **Never two billboards on Home.** If the plugin was updated or reloaded while Home's billboard was still loading, the old copy could add a second billboard above the new one. It now checks first and clears any leftover.
+- New screenshots and short animations in the README.
+
+## 2.10.0
+- **Picture & sound panel** (the sliders button in the player):
+  - remove black bars that are part of the video, measured from the picture, or zoom to 110%, 125% or 133%
+  - Dialogue boost and Night mode, for 5.1 and stereo
+  - subtitle sync: click the line you just heard
+  - a second subtitle language at the top of the picture
+- **Library sorting** — newest, oldest or top rated, plus a genre filter.
+- **Watched titles** — optionally dim or hide them in Discover, Search and Home.
+- **Next episode loaded early** — near the end, the same release is warmed up so it starts sooner (cached debrid links or your own streaming server only).
+- **Subtitles on HDR** — optionally dimmed to grey.
+- **Fixes** — subtitle style and font now reach addon subtitles; picture enhancement follows Stremio's Crop and Stretch; the player title no longer collides with buttons on narrower windows.
+
+## 2.9.6
+- **Recognises a Windows-only converter failure**: when Windows can't start the streaming server's converter because a system DLL is missing (error 3221225781, usually Media Foundation missing on Windows *N* editions), dx.bi says so and explains the fix (install the *Media Feature Pack*, or use *Stremio Service*).
+
+## 2.9.5
+- **Copy details** on the error screen when a converted video won't play: a short report of the streaming server's version and conversion settings, the file's formats and what the converter returned (no links, keys or titles), to paste into a GitHub issue.
+- More reliable check of whether the converter worked: if the player's download records hide the result, dx.bi asks the server again itself.
+
+## 2.9.4
+- **Fixed conversion being skipped when you reopen the same release** (a common way to retry). Each visit to the player now checks again.
+- **When a converted video still fails, dx.bi says why.** If Stremio's streaming server is set to convert with hardware acceleration (*Settings → Streaming → Transcode profile*), which often fails on a PC's graphics card or driver, there's a one-click **Convert without hardware acceleration**. If the server's converter produced nothing, it says so (restart Stremio Enhanced, or reinstall Stremio Service on Windows). Otherwise it's the file itself.
+
+## 2.9.3
+- **Flags show on Windows.** Windows has no flag emoji, so stream languages appeared as letters ("GB / JP / RU"). dx.bi now uses a small flag-only font (Twemoji Country Flags), so flags look the same on every system.
+- **Fixed the streams list looking jumbled on Windows** (rows drawn over each other, Stremio's "Install addons" button showing through). Chromium on Windows can leave stale copies of a scrolled panel that has a blurred glass background, so on Windows those panels and menus now use solid backgrounds.
+
+## 2.9.2
+- **Fixed "Video is not supported" on Windows** (and other PCs without 10-bit HEVC decoding). Stremio only checks basic HEVC support, then sends 10-bit HEVC and Dolby Vision releases unconverted, which those PCs can't decode. dx.bi now has Stremio's streaming server convert them to H.264 when this PC can't decode them, and retries any video that fails the same way. New setting *Convert videos this PC can't play*: Auto (default), Always, or Never.
+- **Uncached debrid releases explained.** Instead of the green "Torrent is being downloaded to debrid…" clip, dx.bi pauses it and says what's happening (still downloading, limit reached, access refused or failed), with *Pick another stream*.
+
+## 2.9.1
+- **Home shows only movie, series & anime rows** (new setting, on by default). Rows from addons that list other things, like a debrid account's downloads or YouTube channels, are hidden on Home and stay available in Discover.
+
+## 2.9.0
+- **Trailers in hover cards**: rest on a title and its trailer fades in, muted, with a speaker button for sound. It only appears once it's really playing, and stops the moment you move away.
+- **Up next**: when the credits roll (taken from the skip data, otherwise the last 30 seconds), a Netflix-style card counts down to the next episode with its thumbnail and title. *Play now*, or *Watch credits* to stay. Pausing the video pauses the countdown. Replaces Stremio's own popup (choose 5–20 seconds, or Off to keep Stremio's).
+- **Anime filler guide**: long anime get *Filler* and *Mixed* tags in the episode list, with filler dimmed (community lists from animefillerlist.com, matched strictly by title). **Skip filler** (off by default) lets Up next jump straight to the next canon episode and opens it with the same release, like binge watching.
+- **New episode badges** on library shows with an episode you haven't seen since it came out, and an **Airing this week** row on Home with countdowns. Episode lists come from your own metadata addons (Cinemeta, TMDB, Kitsu…), checked every 6 hours.
+- **Who's watching?**: add viewers (Netflix-style picker, shown at start once there's more than one). Each viewer has their own watch stats, volume/speed and watch-party name. Library and Continue Watching stay shared, because separate libraries need Stremio's own profiles, which Stremio limits to premium.
+- **Your stats** (profile menu): time watched today, this week, month and year, streaks, a 30-day chart, most-watched titles and top genres, favourite time and day. Only time spent actually playing counts.
+- **Remember volume & speed** between streams (per viewer). The watch party's small catch-up speed changes are never saved.
+- **Keyboard**: 0–9 jump to 0–90% in the player (instead of Stremio switching tabs), and **?** shows every shortcut.
+- dx.bi now keeps its own data (viewers, stats, preferences) in `dxbi-data.plugin.json` next to its settings, so it survives Stremio clearing its storage.
+- **Theme built in**: the plugin now carries the dx.bi theme and uses it whenever no other theme is applied, so installing the plugin alone gives the whole look. Applying the theme file, or any other theme, takes over from it. The "Use the dx.bi theme?" prompt is gone.
+- **One-click Home rows**: a fresh account gets one offer to add the free catalog addons dx.bi's Home uses (TMDB, Streaming Catalogs, Anime Catalogs, TMDB Collections). Also in *Addons → Order & backup*, with Undo.
+- **When a video won't play**, dx.bi explains why under Stremio's error (streaming server not running, or a format this computer can't play) with *Pick another stream* and *Open in mpv/VLC* buttons.
+- **Subtitles start off** (new setting, like Netflix). Stremio turned them on whenever a subtitle language was set, and Stremio Enhanced's embedded-subtitle loader forced English even when it wasn't.
+- **Buffering spinner** in the player instead of the title logo.
+- **Watch party**: everyone now hears when someone leaves the movie or comes back, not only when the host leaves. While you're out of what the party is watching, a **Back to …** button brings you straight back in (for the host too).
+- **Fixed**: going back to Home (from Settings, Search…) froze the app for over a second; Home also kept doing needless work every fraction of a second while idle. Both gone.
+- **Fixed**: *Airing this week* showed a show once per upcoming episode (three Cyberpunks). One card per show now, with "+2 more".
+- **Fixed**: playback could freeze on "buffering" with plenty already loaded (a Chromium decoder stall). dx.bi notices and restarts it.
+- **Fixed**: right-clicking a stream showed its menu underneath the streams below it.
+- **Fixed on Windows**: applying a theme in Stremio Enhanced didn't load until a restart (Windows paths weren't turned into file links).
+
+## 2.8.1
+- **Fixed needing to press back twice** after opening a title from a hover card or the billboard. dx.bi now opens titles the same way Stremio's own links do, so the back arrow returns to where you were in one press (Home, Search and Library all checked).
+- **Fixed the mouse wheel doing nothing while a hover card was open.** Scrolling over the card now scrolls the page (or the row, when you scroll sideways) and closes the card, like Netflix.
+
+## 2.8.0
+- **Everything in one plugin.** Features that used to need separate plugins are now built into dx.bi, written from scratch so nothing clashes:
+  - **Skip Intro, Skip Recap, Skip Credits and Next Episode** buttons (Netflix-style, bottom right), with optional auto-skip for intros and recaps, or credits too. Times come from TheIntroDB for movies and series and AniSkip for anime (Kitsu titles are matched to MyAnimeList automatically). No API key and no analytics.
+  - **Addon order & backup** on the Addons page: drag (or use the arrows) to reorder your addons, back them up to a file, restore from a backup, and undo the last change. Saved to your Stremio account; dx.bi keeps the previous list so a change can always be undone.
+  - **Subtitle styles**: Netflix, bold outline, boxed, classic yellow or soft, plus five fonts. Stremio's own size and position settings still apply, and the styles carry over to the picture-enhancement subtitle layer.
+  - **Picture-in-picture** button in the player.
+- dx.bi's menus and dropdowns sit above everything on their own, so **Context Menu Fix is no longer needed**.
+- If you use TheIntroDB, IntroDB, AniSkip, Stremio Addon Manager, Addon Organizer, Enhanced Video Player, Picture in Picture or Context Menu Fix, turn them off: dx.bi now does the same and you'd get duplicate buttons.
+
+## 2.7.0
+- **One-click setup**: on first start with the default look, dx.bi offers to switch on the dx.bi theme (once; it never replaces a theme you picked). The theme now declares the plugin as a requirement, so Stremio Enhanced won't apply it on its own and leave you with half a redesign.
+- **Fixed themes only appearing after a restart on Linux and macOS.** Stremio Enhanced's Apply button points the stylesheet at a bare file path, which the app resolves as a web address. dx.bi now corrects the link, so any theme applies instantly.
+- **Anime scores on posters and previews.** The Kitsu anime addon passes its own score in the IMDb field, so those badges used to say "IMDb" with a Kitsu number. They're now labelled **Kitsu** (in blue), and anime without any score gets one from Kitsu (kitsu: ids) or AniList (mal: ids), fetched in batches and cached for 3 days.
+- **Open in mpv / VLC** button in the player (shown only when one is installed). It pauses Stremio, so your place is kept, and hands the stream to the external player. Handy for files that stutter or won't play in the app. New setting to hide it.
+- Steadier access to Stremio's internal state: dx.bi keeps a working handle even on screens where Stremio Web drops `window.core`, so My List, watch party and previews don't silently stop.
+
+## 2.6.0
+- **Watch party**: watch in sync with friends. Start a party from the people button, send the code, and everyone's Stremio opens the same title, picking the same release from their own addons and debrid account (matched by torrent hash, then filename, then quality). Shared play, pause and seeking; everyone waits while someone buffers; follows the host to the next episode; chat and reactions. Stream links and API keys are never shared, and everything is end-to-end encrypted with the party code (AES-256-GCM) over public relays, including one on port 443 for strict networks. New settings: watch party on/off, follow the host, chat & activity in the player, sounds.
+- **Fixed Anime4K and Sharpen turning the picture upside down** after the first frame. Shader settings carried over from the last step of one frame into the first step of the next, which flipped the picture and also weakened the Sharpen filter after Anime4K had run. Every step now starts from clean settings.
+
+## 2.5.2
+- Fixed dropdowns not changing anything when the **Context Menu Fix** plugin is installed: Discover type, catalog and genre, Library type, and the season picker. That plugin shows a copy of each open dropdown. Pressing on the copy made Stremio close the real one before your choice reached it. dx.bi now passes the choice straight to the real option.
+- Those dropdown copies now match the width of their button instead of being capped at 125px.
+
+## 2.5.1
+- Fixed hover previews not opening when you moved quickly from one open preview to another title. The old card's close was cancelling the new card's open. The current preview now stays up until the next one replaces it, and still closes as soon as you leave the row.
+
+## 2.5.0
+- **Seek bar previews now work with real streams.** Most streams play through Stremio's local converter (the player only sees a `blob:` URL), so previews now use the streaming server's own thumbnail endpoint. A coarse-to-fine thumbnail strip builds quietly in the background (pausing while the film buffers), so hovering shows a nearby frame instantly and the exact frame a moment later.
+- The preview checks the pointer's real position on every move.
+- **Picture enhancement (upscaler)**: real-time WebGL2 processing with a small mpv user-shader runtime running bloc97's **Anime4K** v4 Restore + Upscale CNN shaders (quality and fast), plus AMD-style contrast-adaptive sharpening for live action. Auto picks per title. HDR10 is tone-mapped to match Stremio's own picture, native subtitles are redrawn on top, and it steps down automatically if frames start dropping. ✨ button in the player.
+
+## 2.4.0
+- **Seek bar previews**: point at the progress bar to see a thumbnail of that moment and its time, Netflix-style; works while dragging too. Frames are cached and only fetched when the cursor rests, to keep bandwidth low.
+- Fixed the seek-bar knob sitting half its width to the right of the true position.
+- Lighter fill from the playhead to the cursor; Stremio's small time tooltip is replaced by the preview card.
+- **Time remaining**: the player clock counts down by default (click it to switch).
+- **Next Episode** button on series, next to the other controls.
+
+## 2.3.0
+- **Stream sorting & filters** above every streams list: sort by addon order, best quality, most seeds, largest or smallest; filter by quality, language (from flags and release names), source, provider, ⚡ instant (cached debrid) and HDR/DV. Works with any stream addon, remembers your choices, and never moves Stremio's own elements (uses CSS order), so streams that arrive late slot in correctly.
+- README: clear note that DX.BI is a reskin, not a streaming service; linked list of compatible plugins with credits.
+
+## 2.2.1
+- Billboard transitions reworked: only the pictures cross-fade; the old title fades out completely before the new one fades in, with no movement — text stays crisp instead of looking washed out mid-change. The outgoing picture keeps its slow zoom until it has faded (no jump).
+- Genre / cast / director pills (details page and Discover panel): text is now optically centred.
+
+## 2.2.0
+- **New intro**: a pre-rendered cinematic film (logo drop-in → push-in → dive through a 3D tunnel of light ribbons → red light wash) with an original stereo score. Plays on the video decoder, so it's smooth even while the app loads (0 dropped frames in testing). Follows your accent colour; skip with Esc/Enter/click.
+- **Interface sounds**: designed, synthesised sounds for tabs, opening titles, previews, My List, player controls, toggles and keyboard navigation, with a volume setting.
+- **Works with your addons**: previews, ratings and artwork now come from the metadata your addons already provide (TMDB, anime, streaming catalogs…), with Cinemeta only filling gaps. Rating badges are skipped on posters that already show one (RPDB etc.). My List reflects the real library state.
+- **Plugin compatibility**: stream-list plugins (Stream Quality Picker, Stream Keyword Filter, Stream Finder, FilterStreams) stack neatly with the streams panel; Enhanced Video Player's subtitle styling becomes a matching panel; Context Menu Fix no longer inflates the account menu; all skip-intro plugins get matching buttons.
+- Billboard keeps rotating while you hover, and resumes cleanly when you come back to Home.
+- Performance: removed every endlessly-running animation (static loading placeholders, GPU-only preview zoom); idle CPU on Home ~2% while the billboard animates, zero elsewhere.
+- One-line installers for Windows (PowerShell) and Linux/macOS.
+
+## 2.1.0
+- Netflix-style animated intro (logo drop-in, push-in, light ribbons), optional synthesized sound.
+- Redesigned hover preview: grows out of the poster, Play / My List / More info, rating, length, HD, genres.
+- New player: ±10s buttons, centred title, play/pause feedback, dot-style speed picker, three-column subtitles panel with ticks.
+- Fixed player menus not closing and the control bar overflowing on wide button sets.
+- Settings refresh immediately after an update (no restart needed).
+- Bounded metadata cache with expiry; each update step is isolated so one failure can't stop the rest.
+
+## 2.0.0
+- First public version: billboard, carousels, IMDb badges, wide Continue Watching, full page restyle.

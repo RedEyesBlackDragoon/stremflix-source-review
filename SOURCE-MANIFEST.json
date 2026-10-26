@@ -1,0 +1,1672 @@
+{
+  "upstream": "https://github.com/notdxbi/dxbi-stremio",
+  "upstreamCommit": "ac8469def67ccc5dcabbea123d023fcb5e380429",
+  "gitHistoryIncluded": false,
+  "runtimeDataIncluded": false,
+  "workflowsIncluded": false,
+  "credentialAndPersonalPatternFindings": 0,
+  "sourceFiles": 276,
+  "changes": {
+    "modified": 51,
+    "unchanged": 105,
+    "added": 120
+  },
+  "files": [
+    {
+      "path": ".gitignore",
+      "status": "modified",
+      "sha256": "e92d4748329c54fc2baf702d32b75c4b36235813411e33065f0efcccaf7c8b6a",
+      "bytes": 320
+    },
+    {
+      "path": "CHANGELOG.md",
+      "status": "unchanged",
+      "sha256": "933a3e3d1368e807e0dff9ee40611825b552e7c9bcb59fb389e981f91fd8bf39",
+      "bytes": 25523
+    },
+    {
+      "path": "HOUSEHOLD.md",
+      "status": "added",
+      "sha256": "0a823a0e95dda5e2f2ad3a2c57c22e4d2bd98906e454364ca1d6cf3d96b5f44c",
+      "bytes": 4365
+    },
+    {
+      "path": "LICENSE",
+      "status": "unchanged",
+      "sha256": "7ecd99e970790ebbca2780afdc97a914c21c1319e8bfc77bc011af210263e6a7",
+      "bytes": 1062
+    },
+    {
+      "path": "LICENSE-ANIME4K",
+      "status": "unchanged",
+      "sha256": "5bad448b737378e3d0c977ad0d0521fa37ad279a7e76ea9a31d9257eeb6953f5",
+      "bytes": 1063
+    },
+    {
+      "path": "README.md",
+      "status": "modified",
+      "sha256": "d53ad586ea285fe7f354059843f549b6aa526364154ca5e7f92c50f155e1fe19",
+      "bytes": 27256
+    },
+    {
+      "path": "app/.eslintrc",
+      "status": "unchanged",
+      "sha256": "7b67b2814cf3907eae267d10d0e10b9328412f2e4196be9f4651ff42f9b8535f",
+      "bytes": 247
+    },
+    {
+      "path": "app/.gitattributes",
+      "status": "unchanged",
+      "sha256": "b56c83a75884aff458edb31c90c0cf3371b47bc104566c07d818e9b4a0e51650",
+      "bytes": 28
+    },
+    {
+      "path": "app/.gitignore",
+      "status": "unchanged",
+      "sha256": "2a560002eebdad45985d3f00e21f41902196aeaca16fe7c81a886b46fda8d28a",
+      "bytes": 40
+    },
+    {
+      "path": "app/LICENSE.md",
+      "status": "unchanged",
+      "sha256": "b79d530962dfb89a0d8b114e33b00c252bd63e3e9b57685ca5b335dac7a1f4df",
+      "bytes": 1117
+    },
+    {
+      "path": "app/README.md",
+      "status": "unchanged",
+      "sha256": "cff2eb80adfcf95589ff7b46883e28efa415b2f1f60d7a40a361ff408f4f156d",
+      "bytes": 1649
+    },
+    {
+      "path": "app/copyComponents.js",
+      "status": "modified",
+      "sha256": "fd91e9f7c7c1fe0231a8693ed49a80fb33df5850dee92c8283e53497d8ce1b21",
+      "bytes": 2224
+    },
+    {
+      "path": "app/images/icon-256.png",
+      "status": "modified",
+      "sha256": "e9ff057cbb0226863de9fc6ab513b1384fbca4d2b7fc0d566713108afcb2ee57",
+      "bytes": 12632
+    },
+    {
+      "path": "app/images/icon-512.png",
+      "status": "modified",
+      "sha256": "36b612ce998dc81f81b8809f6b3db2a1fbb3a3ded1df898a3fcf5e9af9e633e6",
+      "bytes": 26594
+    },
+    {
+      "path": "app/images/icon.icns",
+      "status": "modified",
+      "sha256": "d269a96cdf77f878d3b4e566edfc38e2f53198e66fc592b101ef23045ab96956",
+      "bytes": 132386
+    },
+    {
+      "path": "app/images/icon.ico",
+      "status": "modified",
+      "sha256": "95afc0b5d82cf0c5f2e0bd7ae73d0ce273e2749b10c76eefe74ba41e46830557",
+      "bytes": 25327
+    },
+    {
+      "path": "app/images/icon.png",
+      "status": "modified",
+      "sha256": "a47609f68270283e4b6ceca360fd5ce907add698bb7a642fc407aaad9a4d886c",
+      "bytes": 55471
+    },
+    {
+      "path": "app/images/presence/browse.png",
+      "status": "unchanged",
+      "sha256": "eae87e8251a080e30fb880dbd8d50ee459b6c529f8291e6eaa4b2b9625e28eab",
+      "bytes": 11607
+    },
+    {
+      "path": "app/images/presence/logo.png",
+      "status": "modified",
+      "sha256": "36b612ce998dc81f81b8809f6b3db2a1fbb3a3ded1df898a3fcf5e9af9e633e6",
+      "bytes": 26594
+    },
+    {
+      "path": "app/images/presence/pause.png",
+      "status": "unchanged",
+      "sha256": "2824252a086c1cad6661b5aeb7622d3cf09f210deab2cb5f66803cc24d6b819b",
+      "bytes": 10877
+    },
+    {
+      "path": "app/images/presence/play.png",
+      "status": "unchanged",
+      "sha256": "6a3ed366b493c38791f154cffe01926679f2d19ce582c26d21c89a764f999ecd",
+      "bytes": 11706
+    },
+    {
+      "path": "app/package-lock.json",
+      "status": "modified",
+      "sha256": "ca10b632ed95e485b3b0c0415a1e71c67f11862fba6694a28fe858221b6f1f2f",
+      "bytes": 157368
+    },
+    {
+      "path": "app/package.json",
+      "status": "modified",
+      "sha256": "fbfd1b5acc1e14e442c0365a52cce332e48e3343c96b9231e07886cc9e8d454b",
+      "bytes": 3170
+    },
+    {
+      "path": "app/playwright.config.cjs",
+      "status": "added",
+      "sha256": "0ec8cb14d436a9e012ebd31c9553197a8bd800fe2ea8cefec9bfb7ca0b0df121",
+      "bytes": 591
+    },
+    {
+      "path": "app/playwright.local.config.cjs",
+      "status": "added",
+      "sha256": "39fcaecb6dcbcf4987309fda6f9aa6b43a16462c4c89ca9edeb1b3eccbc480a7",
+      "bytes": 307
+    },
+    {
+      "path": "app/src/components/about-category/about-category.html",
+      "status": "modified",
+      "sha256": "e569fc59d39bcec01dc3181f78445bfa2a935b17d5c66d3f47f1e23fe42e6f7a",
+      "bytes": 6581
+    },
+    {
+      "path": "app/src/components/about-category/aboutCategory.ts",
+      "status": "unchanged",
+      "sha256": "49b50733626a3e4d8793ff5743d216dc5847642ab10af1038ef7a8e4100a5440",
+      "bytes": 2064
+    },
+    {
+      "path": "app/src/components/back-btn/back-btn.html",
+      "status": "unchanged",
+      "sha256": "fdaf53abbf6cb4ac62b8b9321961799880be0b2aaa4219ba716230bab0c17021",
+      "bytes": 375
+    },
+    {
+      "path": "app/src/components/back-btn/backBtn.ts",
+      "status": "unchanged",
+      "sha256": "a704e947dad98151e3d38233809527e07426efc01d60b59c0f970dd5ff518a6e",
+      "bytes": 154
+    },
+    {
+      "path": "app/src/components/default-theme/default-theme.html",
+      "status": "unchanged",
+      "sha256": "e0e7511c6c49055949078f9bb38f1ab33f7853e207c4619d978daca5ec871181",
+      "bytes": 506
+    },
+    {
+      "path": "app/src/components/default-theme/defaultTheme.ts",
+      "status": "unchanged",
+      "sha256": "cebf8e741849d42b602a8df8e8c6501242f6a26686a9ffe0ff4a268a9687e738",
+      "bytes": 452
+    },
+    {
+      "path": "app/src/components/enhanced-nav/enhanced-nav.html",
+      "status": "modified",
+      "sha256": "10a010c200f81725013d4d2fad4e3abbf31190a4c5d5191b71ddc0a5e47001e8",
+      "bytes": 142
+    },
+    {
+      "path": "app/src/components/enhanced-nav/enhancedNav.ts",
+      "status": "unchanged",
+      "sha256": "5b0ee02bd8f7d93a4777bcf121073b6b64f165fc8ec76592731e92f0429a2c3c",
+      "bytes": 159
+    },
+    {
+      "path": "app/src/components/marketplace-item/marketplace-item.html",
+      "status": "unchanged",
+      "sha256": "92d273cae50f0d93e81089cc1886349bc1514be76c071575b26f70c1ee3e7d9f",
+      "bytes": 1992
+    },
+    {
+      "path": "app/src/components/marketplace-item/marketplaceItem.ts",
+      "status": "unchanged",
+      "sha256": "94f9d2a8a9c5e0c16f5756ee6011d9bf63c28733989074e903c606e608ddf855",
+      "bytes": 4915
+    },
+    {
+      "path": "app/src/components/marketplace-tab/marketplace-tab.html",
+      "status": "unchanged",
+      "sha256": "3062284a6bb439a0e2ec06b38ab3b282bf3896c35863c52e412ac1523505dfd5",
+      "bytes": 1986
+    },
+    {
+      "path": "app/src/components/marketplace-tab/marketplaceTab.ts",
+      "status": "unchanged",
+      "sha256": "c15d3f14e353ac8381e2a18afaf43630dd34f27799a8c96d40b520636953ae75",
+      "bytes": 166
+    },
+    {
+      "path": "app/src/components/plugin-item/plugin-item.html",
+      "status": "unchanged",
+      "sha256": "85b8b885ecc2dcc731ec8f1906f148bcca2045f049b3cb43a4fb9282725934b0",
+      "bytes": 6974
+    },
+    {
+      "path": "app/src/components/plugin-item/pluginItem.ts",
+      "status": "unchanged",
+      "sha256": "bc49744b4731e50ba32cc39181ba76ad4e17a24e73e6f9d39467e5387b5e3f4c",
+      "bytes": 714
+    },
+    {
+      "path": "app/src/components/plugin-settings-modal/plugin-settings-modal.html",
+      "status": "unchanged",
+      "sha256": "3a227f5e75c538aeb1b6a5f7834f96c86db94409fcdd136477d5072663b79395",
+      "bytes": 2641
+    },
+    {
+      "path": "app/src/components/plugin-settings-modal/pluginSettingsModal.ts",
+      "status": "unchanged",
+      "sha256": "0596ede4cf91ebf7ae018194a5a1efec0b302f984e9012b05f9b2c51013f0589",
+      "bytes": 5623
+    },
+    {
+      "path": "app/src/components/prompt-modal/prompt-modal.html",
+      "status": "unchanged",
+      "sha256": "acfe4ab725edbf873502ec94a06e102c4d19a9596b8ff2b8da94fc7a72e8fa7c",
+      "bytes": 2054
+    },
+    {
+      "path": "app/src/components/prompt-modal/promptModal.ts",
+      "status": "unchanged",
+      "sha256": "422b9aa6bb4761b106d9bb39ac9d1e84dadc89f2f1090ce52dbef295801dba02",
+      "bytes": 550
+    },
+    {
+      "path": "app/src/components/theme-item/theme-item.html",
+      "status": "unchanged",
+      "sha256": "7e6a59f89cd66f9f4305384713bef8ba9b8f690ff987a0f10fee668d8324d415",
+      "bytes": 1205
+    },
+    {
+      "path": "app/src/components/theme-item/themeItem.ts",
+      "status": "unchanged",
+      "sha256": "1b8a76b9d81f5666041ee0e91e865561721b02ba508fa2cbe15691074ff9525c",
+      "bytes": 896
+    },
+    {
+      "path": "app/src/components/title-bar/title-bar.html",
+      "status": "unchanged",
+      "sha256": "f6ea89a80dadacdc3e17bbfae1870ee8d687db4a45c24f4086cc7b96ba9ec188",
+      "bytes": 1972
+    },
+    {
+      "path": "app/src/components/title-bar/titleBar.ts",
+      "status": "unchanged",
+      "sha256": "719ff4259c058597b8049aec89edac9bc4a2eae97aaa7bd21886392c81ce5e58",
+      "bytes": 161
+    },
+    {
+      "path": "app/src/components/toast/toast.html",
+      "status": "unchanged",
+      "sha256": "07b44c4a65372d85d2a2cb1080e7d6bd05b770bd0d3264c9dffc0139f9043668",
+      "bytes": 573
+    },
+    {
+      "path": "app/src/components/toast/toast.ts",
+      "status": "unchanged",
+      "sha256": "63d930de48e8dcb1a78e44b98f895cd7cc9fb0620eb92f5e2b1e31967bb5e7e6",
+      "bytes": 739
+    },
+    {
+      "path": "app/src/components/update-modal/update-modal.html",
+      "status": "modified",
+      "sha256": "115c46fb43e525b1e61e50cc6f203a72bf4a3d3f20bd6f5e44f85a29a52b1267",
+      "bytes": 3091
+    },
+    {
+      "path": "app/src/components/update-modal/updateModal.ts",
+      "status": "unchanged",
+      "sha256": "1116558ca34e6d18c5238f90129edec536b97eeef57fb85512c57285d8724b5f",
+      "bytes": 571
+    },
+    {
+      "path": "app/src/constants/index.ts",
+      "status": "modified",
+      "sha256": "25d3280b474ad53ccc5f1ca44266f984b9fe07db4d2de3d086ff0e369162b18d",
+      "bytes": 8490
+    },
+    {
+      "path": "app/src/controllers/api/AlertApiController.ts",
+      "status": "unchanged",
+      "sha256": "4ea25f2beb412071dd4b871fa4defd31de0f5fd84dc5820a9f1dc2316b057c44",
+      "bytes": 399
+    },
+    {
+      "path": "app/src/controllers/api/SettingsApiController.ts",
+      "status": "modified",
+      "sha256": "fcf26b153c18a6aa446d539fc0624dd68560383ff7b202f859349a7755c77866",
+      "bytes": 5759
+    },
+    {
+      "path": "app/src/controllers/externalPlayerController.ts",
+      "status": "modified",
+      "sha256": "be6502a710a18408236cef698230105306c5fbccd4ddc1b48da1005ab68ccba4",
+      "bytes": 7043
+    },
+    {
+      "path": "app/src/controllers/gpuController.ts",
+      "status": "unchanged",
+      "sha256": "a4b0401960a4c499a69b0146dc8c2cf4f03a57be3025c8d155a14d9808ab074e",
+      "bytes": 5621
+    },
+    {
+      "path": "app/src/controllers/transparencyController.ts",
+      "status": "unchanged",
+      "sha256": "d99adc409660c9d42a94e82499312e75b8b38dc7d4d28fd4fd16ebfb264e0946",
+      "bytes": 1312
+    },
+    {
+      "path": "app/src/controllers/updaterController.ts",
+      "status": "unchanged",
+      "sha256": "ff337ceba4e642fbc4b7adac87d21dbfe7d16eefe8b157317c3e951e5fab633f",
+      "bytes": 714
+    },
+    {
+      "path": "app/src/controllers/windowController.ts",
+      "status": "unchanged",
+      "sha256": "d4aef2d151df49fba3e6adb25769c16082b8d7cbcb3d41dd9f422890b3da481f",
+      "bytes": 1695
+    },
+    {
+      "path": "app/src/core/BuiltIn.ts",
+      "status": "modified",
+      "sha256": "3f222a71cba9fbd1dc536d22e9d4e053614c9448f381307b870785a9551af419",
+      "bytes": 3762
+    },
+    {
+      "path": "app/src/core/DiscordPresence.ts",
+      "status": "modified",
+      "sha256": "b3c9ffd1c578f4cd12e12582f80b59de524f1b2843fe2f0a4621f3abb1bba8af",
+      "bytes": 4502
+    },
+    {
+      "path": "app/src/core/ModManager.ts",
+      "status": "modified",
+      "sha256": "941aceb121e167a7fd46658995192aeeac70d1859ef06ff648c887af9bf73797",
+      "bytes": 6211
+    },
+    {
+      "path": "app/src/core/Properties.ts",
+      "status": "modified",
+      "sha256": "63d5856421075c989729c1f1519df550b9e3ec32a9ef90ca3e17cca2d602a128",
+      "bytes": 1360
+    },
+    {
+      "path": "app/src/core/Updater.ts",
+      "status": "modified",
+      "sha256": "8f0fae77524524e42eb51a3980e7e72b95a5bc99e7b699ef7702abae7bdec8b1",
+      "bytes": 8044
+    },
+    {
+      "path": "app/src/household/connect.css",
+      "status": "added",
+      "sha256": "1e26e1b0b42021ee47acfbef91b3065de0793916c99e3d32f4ca8c02ac81765a",
+      "bytes": 469
+    },
+    {
+      "path": "app/src/household/connect.html",
+      "status": "added",
+      "sha256": "4c7c1766fffea86d9de57a375e87b1842fcbc04856592213a0a315ad22cbab6e",
+      "bytes": 930
+    },
+    {
+      "path": "app/src/household/connect.js",
+      "status": "added",
+      "sha256": "d2213132115bd4186cc1f647173ed27c4b6b90db490068c648863462f790b598",
+      "bytes": 378
+    },
+    {
+      "path": "app/src/household/launcher.ts",
+      "status": "added",
+      "sha256": "e1169c8998ff790eb901b575c2f251949f8a9b04f1c2d6cf84d888e5c56d1b67",
+      "bytes": 8789
+    },
+    {
+      "path": "app/src/household/local-controller.ts",
+      "status": "added",
+      "sha256": "f615d39933eaf19ed90985cd701822023724dfeaa31b8a9d32be38d742119dd5",
+      "bytes": 4119
+    },
+    {
+      "path": "app/src/household/local-store.ts",
+      "status": "added",
+      "sha256": "1c2621ec35a989c134c7b9c2af9148202702acbc01df6d4516a01bbe9bc93760",
+      "bytes": 6333
+    },
+    {
+      "path": "app/src/household/policy.ts",
+      "status": "added",
+      "sha256": "4cc5b6cd9c3b339b9b87dc7173789ff02ce1ce2eece15073d4cefdb2775b094a",
+      "bytes": 1385
+    },
+    {
+      "path": "app/src/household/preload.ts",
+      "status": "added",
+      "sha256": "754f43811151abe48ea88dd458dedf3b1b05c5116a964103876977af9ccd1f09",
+      "bytes": 606
+    },
+    {
+      "path": "app/src/household/sync.ts",
+      "status": "added",
+      "sha256": "d2ed59e8449fe3efafe7dd6cc75b6f5a03dc11cb067bb86a428aee7f4b68541a",
+      "bytes": 8094
+    },
+    {
+      "path": "app/src/interfaces/ExternalPlayerTypes.ts",
+      "status": "unchanged",
+      "sha256": "d957cc60cbe239df4b54cfa4e4b2b98a1a17e6341fd752872a1a61836582a3fb",
+      "bytes": 143
+    },
+    {
+      "path": "app/src/interfaces/MetaData.ts",
+      "status": "unchanged",
+      "sha256": "d563d8f8f5eca4fbbf2766fedb65502de6eee2e5f5ecbbe8188a3530fbbdcc2f",
+      "bytes": 1171
+    },
+    {
+      "path": "app/src/interfaces/MetaDetails.ts",
+      "status": "unchanged",
+      "sha256": "00a4eea6fd69b3d77533a5b163556a16c7a625596d1672ece46989a900f12c12",
+      "bytes": 127
+    },
+    {
+      "path": "app/src/interfaces/PlayerState.ts",
+      "status": "unchanged",
+      "sha256": "0e256eebfcb978fc206468a09e1cd327dcbe3cd6aa1d0abd4c8e2ef722da1ca6",
+      "bytes": 250
+    },
+    {
+      "path": "app/src/interfaces/PluginSettingSchema.ts",
+      "status": "unchanged",
+      "sha256": "fcef1890f370891c3bac2dddbf6e881347eb80d05be98a98b9caa99a2bc3b32d",
+      "bytes": 249
+    },
+    {
+      "path": "app/src/interfaces/RegistryMetaData.ts",
+      "status": "unchanged",
+      "sha256": "de45d76d57c15b2d805ed7ed5a59d80519a15b45bb0b838f20bac22819958b58",
+      "bytes": 162
+    },
+    {
+      "path": "app/src/interfaces/RendererTypes.ts",
+      "status": "unchanged",
+      "sha256": "314f5c862da606235fdc99d389ce346e26e5299124ce5fcd7fecc081e95dab25",
+      "bytes": 149
+    },
+    {
+      "path": "app/src/interfaces/SeriesInfo.ts",
+      "status": "unchanged",
+      "sha256": "b3cc8d1d0a8c9e88e066a7175c24d9462ccb4d979759fb8b641c0a33d6c3b5ab",
+      "bytes": 93
+    },
+    {
+      "path": "app/src/main.ts",
+      "status": "modified",
+      "sha256": "1aa33188286c47f145b0778328d596660515c33aa0a9f62d134c6b5555a801cd",
+      "bytes": 18141
+    },
+    {
+      "path": "app/src/preload/api/alert.ts",
+      "status": "unchanged",
+      "sha256": "2799c507cc1de89ab8d789bed3cb5d91f805e38e0d178b7fa5b03b945518c4c0",
+      "bytes": 1734
+    },
+    {
+      "path": "app/src/preload/api/applyTheme.ts",
+      "status": "unchanged",
+      "sha256": "a4e015820c64360d41f192929c3ecd2d72d7a0fab99c8d5499fe0e7f83e4e786",
+      "bytes": 3916
+    },
+    {
+      "path": "app/src/preload/api/externalPlayer.ts",
+      "status": "unchanged",
+      "sha256": "98ca8393200d1937d3e7855a02050237124dca725c8c5f21e3ea4b6969a190e5",
+      "bytes": 627
+    },
+    {
+      "path": "app/src/preload/api/gpuRenderer.ts",
+      "status": "unchanged",
+      "sha256": "074b3f3d1ca98a00c10c8d48f2109816272e8198107e9710c65959a46eca1e9e",
+      "bytes": 367
+    },
+    {
+      "path": "app/src/preload/api/pluginLogger.ts",
+      "status": "unchanged",
+      "sha256": "197f8f928d5ee331259c6c6347e75b03cdf9e9dca8dc179c0c3d2ba25b240abe",
+      "bytes": 500
+    },
+    {
+      "path": "app/src/preload/api/settings.ts",
+      "status": "unchanged",
+      "sha256": "4708c34ef2fba8de935a994e24954e5e42eb4ec24d139503de488e802d4db46c",
+      "bytes": 3164
+    },
+    {
+      "path": "app/src/preload/index.ts",
+      "status": "modified",
+      "sha256": "a30073e5638734c5c4213ed7d07a91d98195e8fb7f51337a94dda68fb2923490",
+      "bytes": 6377
+    },
+    {
+      "path": "app/src/preload/setup/initialization.ts",
+      "status": "modified",
+      "sha256": "dfaf96238ce8a672746a70343a423bd51862972ba50daefc138b9f132f6a346d",
+      "bytes": 3002
+    },
+    {
+      "path": "app/src/preload/ui/discordTracker.ts",
+      "status": "unchanged",
+      "sha256": "df8d1174289ce032818074d2f46fce19ce4312d06eb580f3465dc49a15145ec2",
+      "bytes": 6370
+    },
+    {
+      "path": "app/src/preload/ui/externalPlayerInterceptor.ts",
+      "status": "unchanged",
+      "sha256": "28b970991797844578fc707e1ffd21db93f0b354593e92b5bc08e52dceb211b7",
+      "bytes": 2510
+    },
+    {
+      "path": "app/src/preload/ui/mod/modBrowser.ts",
+      "status": "unchanged",
+      "sha256": "cef0cd246d0716856596eb8b7da709cf98b5a143c523b9b91cff221812c53a7f",
+      "bytes": 4237
+    },
+    {
+      "path": "app/src/preload/ui/mod/modController.ts",
+      "status": "modified",
+      "sha256": "1b8d2bad7e85cbe9f736ab97619cdacd545859eba5a0808f5d1349677566f586",
+      "bytes": 13738
+    },
+    {
+      "path": "app/src/preload/ui/settings/settingsBuilder.ts",
+      "status": "unchanged",
+      "sha256": "0470eade2260f7da733ecadacc9334161ea8b13fa35b1733c9c8ae3d241992dd",
+      "bytes": 8176
+    },
+    {
+      "path": "app/src/preload/ui/settings/settingsInjector.ts",
+      "status": "modified",
+      "sha256": "cbbddfd466f4c37f8aa1a1e6ffa68b2b4820af40bf8c15a202e75d8018e2d261",
+      "bytes": 4884
+    },
+    {
+      "path": "app/src/preload/ui/settings/settingsToggles.ts",
+      "status": "modified",
+      "sha256": "b1f28a3bbee46863e9b483107a6125e19cd8fd96d28e89cd34cc3c29f37dbf44",
+      "bytes": 6544
+    },
+    {
+      "path": "app/src/preload/ui/titleBar.ts",
+      "status": "unchanged",
+      "sha256": "d90b3c049e97494022092b9855fa94dd68a77d188e1c6e9905777b213f5f67fa",
+      "bytes": 3355
+    },
+    {
+      "path": "app/src/utils/AudioTracks.ts",
+      "status": "unchanged",
+      "sha256": "977df1fd31d39d2c2dc53923bc7fafd38d983f17e6d9907c06f3ce6a335409ac",
+      "bytes": 10887
+    },
+    {
+      "path": "app/src/utils/EmbeddedSubtitles.ts",
+      "status": "unchanged",
+      "sha256": "564fee82992d73aa890a4c740f0a65b41f1e3b2cc2a20d7955245740d7161cc0",
+      "bytes": 10127
+    },
+    {
+      "path": "app/src/utils/ExtractMetaData.ts",
+      "status": "unchanged",
+      "sha256": "a611deca6766930800b361e48bee24f71bf0c0d7ba0c87ee1623c43a14e21243",
+      "bytes": 2447
+    },
+    {
+      "path": "app/src/utils/Helpers.ts",
+      "status": "unchanged",
+      "sha256": "20e73fa735a49067c5d902edfcbb637b5739bd84668b8214a58bbc6aa1c84b47",
+      "bytes": 11309
+    },
+    {
+      "path": "app/src/utils/PlaybackState.ts",
+      "status": "unchanged",
+      "sha256": "3664fe267df9a5bfe7a6183d15dfff1285cd2ccc282eae1da05107eb7281baed",
+      "bytes": 2432
+    },
+    {
+      "path": "app/src/utils/StreamingServer.ts",
+      "status": "modified",
+      "sha256": "fa34b12c8a1e6c5416540fdac0b33b73b7b0892e4721f64e789c4af40bbbd1fb",
+      "bytes": 18123
+    },
+    {
+      "path": "app/src/utils/StremioService.ts",
+      "status": "unchanged",
+      "sha256": "0e8a5931aef84fc251a9c40910e045766f5f5d659c284ae7d5969fd52a2ed123",
+      "bytes": 18474
+    },
+    {
+      "path": "app/src/utils/icons.ts",
+      "status": "unchanged",
+      "sha256": "42246721d8f7e0943bc1a7c58d8a2f9a39a130f8864406f3738b6ff1ff4ce52a",
+      "bytes": 872
+    },
+    {
+      "path": "app/src/utils/logger.ts",
+      "status": "unchanged",
+      "sha256": "42c24a0ad25fa55650007eeadd19404d21346891ed32e3810ff2bc3121c58e81",
+      "bytes": 843
+    },
+    {
+      "path": "app/src/utils/templateCache.ts",
+      "status": "unchanged",
+      "sha256": "1167df17c94ac4e627122dd24c5ceccf76aefdeec295d9208657ebc9b9479d85",
+      "bytes": 1068
+    },
+    {
+      "path": "app/tests/adapter.spec.cjs",
+      "status": "added",
+      "sha256": "69b1528a98375e387ed643902f7b8c1f7f0b450bd223a703896f3120eb8ca88f",
+      "bytes": 1770
+    },
+    {
+      "path": "app/tests/household.spec.cjs",
+      "status": "added",
+      "sha256": "7fb7bddf0b1a5f22d00951759f77d6b9b2a7407962646fdeebc9d7298bbe6c70",
+      "bytes": 3284
+    },
+    {
+      "path": "app/tests/isolation-main.cjs",
+      "status": "added",
+      "sha256": "065d3267b61f1472f8e3ad4dacb58c385385f638076cd22d7a771327e061090a",
+      "bytes": 463
+    },
+    {
+      "path": "app/tests/isolation.html",
+      "status": "added",
+      "sha256": "cdd3b5ee3dd32b9b44871a0b71e93b79cf21c9958d85e8bbef606ff118bf9dca",
+      "bytes": 115
+    },
+    {
+      "path": "app/tests/local-client.spec.cjs",
+      "status": "added",
+      "sha256": "58b1f2e04846477e76b6e258753362ad94e377903f1e89581a83a98c025825a7",
+      "bytes": 4154
+    },
+    {
+      "path": "app/tests/local-store.spec.cjs",
+      "status": "added",
+      "sha256": "da6b9ff1d248bfd8811402603cccbd87221d62e9ef91f57377536bb06bc04a7e",
+      "bytes": 2649
+    },
+    {
+      "path": "app/tests/outbox-main.cjs",
+      "status": "added",
+      "sha256": "9bb65d126dd855e4d33c94d8942fa40985c135fb6cbbd435ad579ad5b0b2b3ca",
+      "bytes": 1601
+    },
+    {
+      "path": "app/tests/ui.spec.cjs",
+      "status": "added",
+      "sha256": "2868bc2c53ea7901cf519641df9f9a8b4f8c91d8563c29ad26687ed4e21da4f0",
+      "bytes": 4318
+    },
+    {
+      "path": "app/tests/z-launcher.spec.cjs",
+      "status": "added",
+      "sha256": "c306fc520434d1d039b2dbd737e227f7bda0cacbc15bb92abf7edac4214da1ce",
+      "bytes": 1851
+    },
+    {
+      "path": "app/tests/z-outbox.spec.cjs",
+      "status": "added",
+      "sha256": "3531e2f987e8713032eddc9771cd6a3e0f27bd9788c9fee26b1f9d4bfd7979e4",
+      "bytes": 2992
+    },
+    {
+      "path": "app/tsconfig.json",
+      "status": "unchanged",
+      "sha256": "ee44e26dcc5f38ac9254f07f320373759d72915ce37e687ee1cbde4d8101f96f",
+      "bytes": 738
+    },
+    {
+      "path": "app/version",
+      "status": "modified",
+      "sha256": "6ad9613a455798d6d92e5f5f390ab4baa70596bc869ed6b17f5cdd2b28635f06",
+      "bytes": 5
+    },
+    {
+      "path": "docs/household/ACCEPTANCE.md",
+      "status": "added",
+      "sha256": "8ffbafd46527e5934688c0efa4c401abaf7618ccba550a6c13d2c81bfa77ac5b",
+      "bytes": 1339
+    },
+    {
+      "path": "docs/household/ANDROID-TV-ENTERPRISE-PLAYER-RESEARCH.md",
+      "status": "added",
+      "sha256": "3ad1871154f5f7d224bfd100866f714746f170b5501971745534ff662f97e1e4",
+      "bytes": 10219
+    },
+    {
+      "path": "docs/household/ANDROID-TV.md",
+      "status": "added",
+      "sha256": "d3d91bfb20697f1242e2833e74b9765950595c478eb52119e4142eb2f60dcc3d",
+      "bytes": 5237
+    },
+    {
+      "path": "docs/household/DECISIONS.md",
+      "status": "added",
+      "sha256": "a9d6121fc403bc6c00e4798f8fb6d5b54215153716ce9cc32bb68c954f78e9d8",
+      "bytes": 5858
+    },
+    {
+      "path": "docs/household/EPISODE-RECREATION.md",
+      "status": "added",
+      "sha256": "279421cd69ca6a22ed118fb4b5edf94813d0c735656e5170474cf091a66caf24",
+      "bytes": 2671
+    },
+    {
+      "path": "docs/household/FORK-ADDITIONS.md",
+      "status": "added",
+      "sha256": "98780f9584fb9ed1c827f734abe9185fb933ef252164e733f86e0cf128d712ac",
+      "bytes": 9069
+    },
+    {
+      "path": "docs/household/OPERATIONS.md",
+      "status": "added",
+      "sha256": "f1f71d7f7e0d915e696e3922c0a77ac59f5e23d4fa3097e50db4ee712e621d1e",
+      "bytes": 4411
+    },
+    {
+      "path": "docs/household/PRIVACY.md",
+      "status": "added",
+      "sha256": "a3f95f551ca5a85aab81c2b484c9573193da5356b3b9e54b77366c2c88def3e2",
+      "bytes": 1738
+    },
+    {
+      "path": "docs/household/SHARING.md",
+      "status": "added",
+      "sha256": "d97f5e5c8544c7e0b1e900f1551965ee696aadbfd8877123fe813eac3617720f",
+      "bytes": 2607
+    },
+    {
+      "path": "docs/household/SPEC.md",
+      "status": "added",
+      "sha256": "9affec1659b368882c94726ad5767aa809e917a41cd371a799314687cc9c3130",
+      "bytes": 37798
+    },
+    {
+      "path": "dxbi.plugin.js",
+      "status": "modified",
+      "sha256": "cc76a3f271dcc8918fc8337beeae0a8de81b2495b994533040514130b6b629bd",
+      "bytes": 1794914
+    },
+    {
+      "path": "dxbi.theme.css",
+      "status": "modified",
+      "sha256": "77f6b416f6a0af744e225580ec73192f18c123d0df3e33178a6bd80faa234d09",
+      "bytes": 128114
+    },
+    {
+      "path": "household/.env.example",
+      "status": "added",
+      "sha256": "60e0c6a4506cb8066dff725ae0a5ac22d5d966528dc62adef1a8f2a80a11f94d",
+      "bytes": 418
+    },
+    {
+      "path": "household/Caddyfile",
+      "status": "added",
+      "sha256": "09adf72d0e525075ac33c901a1bef04e04445459580a4ee4f747c3a5cf59f44e",
+      "bytes": 148
+    },
+    {
+      "path": "household/Dockerfile",
+      "status": "added",
+      "sha256": "e34e451401f2c0af939829c8c0866922a2510afc5668c3406a653d2a88ba899a",
+      "bytes": 475
+    },
+    {
+      "path": "household/alembic.ini",
+      "status": "added",
+      "sha256": "5ec0e70cb44a59a0261c64e35303922d3348b595e9580077a413895d936620fb",
+      "bytes": 126
+    },
+    {
+      "path": "household/compose.yaml",
+      "status": "added",
+      "sha256": "0bb399b25268eb5ded3d3ea6e2b252e56aff15ad5bac499d201228d3a61c3839",
+      "bytes": 1694
+    },
+    {
+      "path": "household/migrations/env.py",
+      "status": "added",
+      "sha256": "b7ee881f3dcbb1d648d5de64551f28b00133926a296348b46f91188c1438fbae",
+      "bytes": 547
+    },
+    {
+      "path": "household/migrations/script.py.mako",
+      "status": "added",
+      "sha256": "ee5dd9a388ee59fd3d089670c2f60db5f5904da6f21cfe3bfc44d7f567ee1546",
+      "bytes": 355
+    },
+    {
+      "path": "household/migrations/versions/000c544069b3_initial_household.py",
+      "status": "added",
+      "sha256": "7d120a53f4f74a481b5ffaf6a171fc220e270e19a76c1f5be30c82e639454efe",
+      "bytes": 21406
+    },
+    {
+      "path": "household/migrations/versions/cb932bdced55_profile_scoped_metadata.py",
+      "status": "added",
+      "sha256": "2baa79c9259b7cd3e2fd811d19f3838e70404da1cc43c70684f09b355e379224",
+      "bytes": 1435
+    },
+    {
+      "path": "household/requirements.lock.txt",
+      "status": "added",
+      "sha256": "50720a39c533310d9ab2d3041e7ee8bdc3dee18869faa4d4798c281027f2688c",
+      "bytes": 1112
+    },
+    {
+      "path": "household/requirements.txt",
+      "status": "added",
+      "sha256": "859eedbc86cf73409dd66e8af977456372b2cd6f49dba481bcfa5ab0f9f1118f",
+      "bytes": 234
+    },
+    {
+      "path": "household/service/__init__.py",
+      "status": "added",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "household/service/db.py",
+      "status": "added",
+      "sha256": "d5271b724a9adfb93f42bf3fdb17bfb3a525666dd80550b3f81ee4574875c172",
+      "bytes": 669
+    },
+    {
+      "path": "household/service/importer.py",
+      "status": "added",
+      "sha256": "37996aa5b05ee7ab05038488e221bd753ff26e957ebc7487af63fea01d947d88",
+      "bytes": 4229
+    },
+    {
+      "path": "household/service/main.py",
+      "status": "added",
+      "sha256": "28c2fe37e20a727c7fefac51ac994e7e0ae7a9e297ba4bf686d65431b5deea2d",
+      "bytes": 42130
+    },
+    {
+      "path": "household/service/models.py",
+      "status": "added",
+      "sha256": "917bb9300e9041e1165d6b04ce15f0883b203d5883d877793cb19d76e3509bff",
+      "bytes": 12846
+    },
+    {
+      "path": "household/service/playback.py",
+      "status": "added",
+      "sha256": "88f74135fdcad12bbc37b2c7d2c501ba67835c6a821c40e8b9b48a3bf4b109a2",
+      "bytes": 1111
+    },
+    {
+      "path": "household/service/providers.py",
+      "status": "added",
+      "sha256": "bc8b9f02b39b5c274aaf171105e430df198a1b3667307e41b8a86ca40bbac07f",
+      "bytes": 4732
+    },
+    {
+      "path": "household/service/ranking.py",
+      "status": "added",
+      "sha256": "16ca4469432df2e6e8231f2178bbb51cc720993b37c1e1c6d72ea3f97e6311ae",
+      "bytes": 4924
+    },
+    {
+      "path": "household/service/resolver.py",
+      "status": "added",
+      "sha256": "a740d108db6ca97390895082b4e3615084898545f0d43e17dd2118ba12e0d971",
+      "bytes": 4760
+    },
+    {
+      "path": "household/service/schemas.py",
+      "status": "added",
+      "sha256": "298617dc1da55e541fa7ff6e67ec67bba176f64ab1777687dc77724868428659",
+      "bytes": 3044
+    },
+    {
+      "path": "household/service/security.py",
+      "status": "added",
+      "sha256": "c55ceb1c95e21823db1f93abe1313874d6f5123d2792e0cc778cd793f57fba6c",
+      "bytes": 2621
+    },
+    {
+      "path": "household/service/worker.py",
+      "status": "added",
+      "sha256": "42f16a345c00f34c93f3ad3dff69baedae13133ab399e40d635d2a45b92c1b37",
+      "bytes": 6479
+    },
+    {
+      "path": "household/tests/conftest.py",
+      "status": "added",
+      "sha256": "2d8903a002f4c3f5e3606039aaaeedc8da37766613fb28c28b5b8a643c315749",
+      "bytes": 4461
+    },
+    {
+      "path": "household/tests/test_acceptance.py",
+      "status": "added",
+      "sha256": "07c1122f3ff1259f55cb0e39b1876dae25cc60be47de5a44bf72853b37815ce2",
+      "bytes": 14874
+    },
+    {
+      "path": "household/tests/test_backup.py",
+      "status": "added",
+      "sha256": "8b382fd6793d5e59f3b5bd551e6a17808300041a157a0c010b934b06c2df794b",
+      "bytes": 891
+    },
+    {
+      "path": "household/tests/ui_server.py",
+      "status": "added",
+      "sha256": "778181e760237d2ea5e3be9c9a69e2cf0cdf0274b68ba25f00d09f690f4915b8",
+      "bytes": 2247
+    },
+    {
+      "path": "household/web/app.css",
+      "status": "added",
+      "sha256": "e2231e560185416e422b572e91e48776aa36910bf405941ef4c1d3636dcffbf3",
+      "bytes": 4463
+    },
+    {
+      "path": "household/web/app.js",
+      "status": "added",
+      "sha256": "aef96534d9fdc977dc341758d11c9be24c07d6e76d9253d633836429149966b2",
+      "bytes": 24739
+    },
+    {
+      "path": "household/web/focus.js",
+      "status": "added",
+      "sha256": "2529724dfda16e840337e65306bcaac66f303e0f88ef2c929159262537bbdce0",
+      "bytes": 1955
+    },
+    {
+      "path": "household/web/index.html",
+      "status": "added",
+      "sha256": "e5f6267b2f81c6bb7f09ab8f516e5ff39876273dc10652cd0546f152cf542444",
+      "bytes": 917
+    },
+    {
+      "path": "household/web/licenses.txt",
+      "status": "added",
+      "sha256": "30993a1f599fafc875739051d0f8230602c4e4287fb3494c9e14edc48b65f949",
+      "bytes": 4715
+    },
+    {
+      "path": "household/web/sw.js",
+      "status": "added",
+      "sha256": "1b26aac54754684babe45ba17c62ba3769a580f6bb56642ba3f7aa7e0e7f39e2",
+      "bytes": 754
+    },
+    {
+      "path": "install.ps1",
+      "status": "unchanged",
+      "sha256": "9d281516f606945a4caaa21348e0513c7c8a28f587ee25a53843966806bfa732",
+      "bytes": 2012
+    },
+    {
+      "path": "install.sh",
+      "status": "unchanged",
+      "sha256": "a67f821fd6be4590b6e45bc4b88bdd6b727b58409f138acf87d4f90215eb4f61",
+      "bytes": 1560
+    },
+    {
+      "path": "screenshots/banner.jpg",
+      "status": "unchanged",
+      "sha256": "4f81f1ff72feca54966ac99d7add68941c3410504c4b785bc468784164ce4d2a",
+      "bytes": 20299
+    },
+    {
+      "path": "screenshots/black-bars.webp",
+      "status": "unchanged",
+      "sha256": "3e8912ba52fd9f0f2dc66b7786cc6c53637932feca12ab9b563878005e886010",
+      "bytes": 3827792
+    },
+    {
+      "path": "screenshots/detail.jpg",
+      "status": "unchanged",
+      "sha256": "368aecc7784957a3030b9ba49d72353f0fedfd2ef0408fdd60fbe4006f0efa3a",
+      "bytes": 172726
+    },
+    {
+      "path": "screenshots/discover.jpg",
+      "status": "unchanged",
+      "sha256": "8bdcf14e4f0c53780fbbd9bef1b6f1d420c96e22b92aa0aa97146e634d0e56a7",
+      "bytes": 267238
+    },
+    {
+      "path": "screenshots/dual-subs.jpg",
+      "status": "unchanged",
+      "sha256": "b1235c027665607ba3ac3c3e257c8c1a4896db93a34ef592f8c0bc7a702c0b4e",
+      "bytes": 102484
+    },
+    {
+      "path": "screenshots/home.jpg",
+      "status": "unchanged",
+      "sha256": "50e648744534ffdd767f1cb5a8076f32a7924f2960da8e312564ac2a8deaf9fc",
+      "bytes": 221579
+    },
+    {
+      "path": "screenshots/hover.webp",
+      "status": "unchanged",
+      "sha256": "8321e998a4ff77e53c415fc3982c266ff0aa9b1b7e88b63bb2db2bccbe8dc232",
+      "bytes": 5359144
+    },
+    {
+      "path": "screenshots/intro.webp",
+      "status": "unchanged",
+      "sha256": "6bdbfcd9555170a74fb6f879c840775e67de48eea2209a53c760d92b79a73473",
+      "bytes": 451298
+    },
+    {
+      "path": "screenshots/panel.jpg",
+      "status": "unchanged",
+      "sha256": "973804d7f6c8625688f70a45c50162fae92380533ac17a16ecb4488e97192dc6",
+      "bytes": 97676
+    },
+    {
+      "path": "screenshots/party.jpg",
+      "status": "unchanged",
+      "sha256": "8ae3a7ac31e0f257b41295bb5f821f0a33a939c55831e9db1232ba6035c684b3",
+      "bytes": 35549
+    },
+    {
+      "path": "screenshots/player.jpg",
+      "status": "unchanged",
+      "sha256": "c8b8e16dca3b735ad95a216612bf4aa9721de45cda66580515f1912b353fba77",
+      "bytes": 125391
+    },
+    {
+      "path": "screenshots/preview.jpg",
+      "status": "unchanged",
+      "sha256": "60c0dc5ecc3618a4fc90a8e068e3bda7016c709d2464b417fde7b26937b07d4f",
+      "bytes": 217387
+    },
+    {
+      "path": "screenshots/reviews.jpg",
+      "status": "unchanged",
+      "sha256": "63f9a92cff21eb9daebee7dc0795a497a574b87dd36b6b4b9b0bcff2a2410dd3",
+      "bytes": 155100
+    },
+    {
+      "path": "screenshots/series.jpg",
+      "status": "unchanged",
+      "sha256": "aa0f5158dc1ad73685bf80197baa4e87e4bd34d9a8da53a5f27d99baf688532c",
+      "bytes": 178735
+    },
+    {
+      "path": "screenshots/settings.jpg",
+      "status": "unchanged",
+      "sha256": "2fade5cb01dde601b1e789f2217ebd96b83d4b9a4165757f0229117dcfa7b3a8",
+      "bytes": 76554
+    },
+    {
+      "path": "screenshots/streams.jpg",
+      "status": "unchanged",
+      "sha256": "7e85768cb515ff81292b436af8c5846c265505b3fac13ca671f0ab82849fac7d",
+      "bytes": 49863
+    },
+    {
+      "path": "screenshots/subtitle-sync.webp",
+      "status": "unchanged",
+      "sha256": "9c6da55174aa4e2c6048a4d1e89a43bb6bf90628ed566213deafe7c9ab63d1bb",
+      "bytes": 4715730
+    },
+    {
+      "path": "shared/local/index.html",
+      "status": "added",
+      "sha256": "26c3315667b04d2dadcc4a3be34310ba68d44a2cfce89c962119276a84abf16d",
+      "bytes": 838
+    },
+    {
+      "path": "shared/local/local.js",
+      "status": "added",
+      "sha256": "0730fb4c14f4558cf7662b756b4fd2a0d87eeafb7dacbd0703335dad9263b213",
+      "bytes": 9284
+    },
+    {
+      "path": "shared/local/style.css",
+      "status": "added",
+      "sha256": "efbabdb5585424661098d544d3ac166a209c1bc8b8e59bef16cbf45c2c5f1faa",
+      "bytes": 5367
+    },
+    {
+      "path": "shared/stremio-adapter.js",
+      "status": "added",
+      "sha256": "618798a70aa8c4707060643c554250ce96927ba77e28e39394ec8fd56246eb6c",
+      "bytes": 3174
+    },
+    {
+      "path": "tools/README.md",
+      "status": "modified",
+      "sha256": "933d32086e33a0aac3810709f46900c7d621a32773c6b646f48eee2adf120671",
+      "bytes": 2067
+    },
+    {
+      "path": "tools/bundle-theme.mjs",
+      "status": "unchanged",
+      "sha256": "96878be7f0cf87d334fc76d8dba75462fd11e640d46bbe5f4dd9421d9de09a81",
+      "bytes": 1369
+    },
+    {
+      "path": "tools/household/Build-TV.ps1",
+      "status": "added",
+      "sha256": "425587504d4362ff65f9ccaed0c46cb53d5aa27c360ab9422ba8ee546094685d",
+      "bytes": 944
+    },
+    {
+      "path": "tools/household/Build.ps1",
+      "status": "added",
+      "sha256": "acf137528b19b7501461b72ef92b9215081706439952f1a0d12cb17a35387bb9",
+      "bytes": 1683
+    },
+    {
+      "path": "tools/household/Start-Local.ps1",
+      "status": "added",
+      "sha256": "4e34c2fb3f8cff7537e957f2d8b9201ec7f25656c64f3fb562cb84802515af0e",
+      "bytes": 2767
+    },
+    {
+      "path": "tools/household/Stop-Local.ps1",
+      "status": "added",
+      "sha256": "4961f321ff4cddb26c23e349f56ae118d08590c083b7ec78d279485c185f3bb1",
+      "bytes": 1333
+    },
+    {
+      "path": "tools/household/audit-android.py",
+      "status": "added",
+      "sha256": "3325938f4d93dbaf8ec6cda0b92662ae02b8ebb95ed6201c81e9537e7d655551",
+      "bytes": 1821
+    },
+    {
+      "path": "tools/household/backup.py",
+      "status": "added",
+      "sha256": "aa1105d501a0dc965a1c05ccaa25cc3cc4055cddf655e411bdab802843db6291",
+      "bytes": 3483
+    },
+    {
+      "path": "tools/household/check-js.cjs",
+      "status": "added",
+      "sha256": "f431234d029edb6de1f5e0226333a3ba8b359be9232de28f8015af75a909437f",
+      "bytes": 623
+    },
+    {
+      "path": "tools/household/check-live-catalog.py",
+      "status": "added",
+      "sha256": "a0b90cab718cf71be1bf6e21821a6728ae5902d315dfeb13dfc43a93afd1507d",
+      "bytes": 2290
+    },
+    {
+      "path": "tools/household/check-profile-picker.cjs",
+      "status": "added",
+      "sha256": "554c12cd49079d67f2c2a288abbbd7cad416ba774bb1af766ab396a550ec852c",
+      "bytes": 3451
+    },
+    {
+      "path": "tools/household/check-shield-picker.cjs",
+      "status": "added",
+      "sha256": "1693bf0cbd9503de62bf27f27356adf1eb76550ef3c7c81a0463e79b0d3a8ba3",
+      "bytes": 4381
+    },
+    {
+      "path": "tools/household/check-tv-browsing.cjs",
+      "status": "added",
+      "sha256": "f1b8731f3506b9e0791d2473aa90a9cd9db825bbbee2beedfed2dc4f7935a875",
+      "bytes": 3064
+    },
+    {
+      "path": "tools/household/check-tv-controls.cjs",
+      "status": "added",
+      "sha256": "bbdfe2caf2de2967b13145a6bccfb0ba9a43ee2fab8e61dd93ac43e35fb84a29",
+      "bytes": 5191
+    },
+    {
+      "path": "tools/household/check-tv-episode-switch.cjs",
+      "status": "added",
+      "sha256": "7cb5b9aaca64b52fb3a32ec3d546d510d2aeaaea604273168efa813cffe784d5",
+      "bytes": 6246
+    },
+    {
+      "path": "tools/household/check-tv-hold.cjs",
+      "status": "added",
+      "sha256": "f495525642c38cfd49d6b33fb5f6668ad45d4c754d9060456db979833531599d",
+      "bytes": 2173
+    },
+    {
+      "path": "tools/household/check-tv-library.cjs",
+      "status": "added",
+      "sha256": "5ae358fca2fff1f963f7b794558a9d00f00c4f8bdb5a26f78cf23262a4b73e9d",
+      "bytes": 5993
+    },
+    {
+      "path": "tools/household/check-tv-tabs.cjs",
+      "status": "added",
+      "sha256": "fa8c28db836bc11d0c1d750c986ea06296711d67b972749259d8f12752040ede",
+      "bytes": 2022
+    },
+    {
+      "path": "tools/household/dependency-notices.cjs",
+      "status": "added",
+      "sha256": "c1de4f8c19e5994ffb2daf43077248d65a0deaa0e8022bc1106e6a5820082be5",
+      "bytes": 1248
+    },
+    {
+      "path": "tools/household/export-netflix-simkl.py",
+      "status": "added",
+      "sha256": "540d4ef2cc5337b223281ecea4e9179e323d2080b1d50d5166d98c87e109eb99",
+      "bytes": 6328
+    },
+    {
+      "path": "tools/household/load-tv-plugin.cjs",
+      "status": "added",
+      "sha256": "de50c71a0ae45b04e5cd9492c3e69eb29ef68853ba0354986ea9b8a1fe431ec7",
+      "bytes": 1647
+    },
+    {
+      "path": "tools/household/prepare-share.py",
+      "status": "added",
+      "sha256": "68a302fdb98ce1d77342dad94de0780c40e1f1f69dba7b0e86d40c4e5dfb3d8a",
+      "bytes": 9406
+    },
+    {
+      "path": "tools/household/review-tv-navigation.cjs",
+      "status": "added",
+      "sha256": "e3a8a290ca478b5b34d7e136f6ef6c0b680ce45fb67db91c7a55bd49ad241798",
+      "bytes": 6470
+    },
+    {
+      "path": "tools/household/tests/episode-navigation.cjs",
+      "status": "added",
+      "sha256": "b53ce8eb0d003c937f2b91c0a79a5149e8f55cc0da5340ce9e14bc675ab93578",
+      "bytes": 9471
+    },
+    {
+      "path": "tools/household/tests/test_netflix_export.py",
+      "status": "added",
+      "sha256": "8147526c21230c84a84834f7967309a23807b73d478eb9e7455a4348fb895f33",
+      "bytes": 1568
+    },
+    {
+      "path": "tools/household/tests/test_prepare_share.py",
+      "status": "added",
+      "sha256": "6aa1cbe51070da9f8f48b6cabc155196d34cbd53f029d3742663fe83f10d9102",
+      "bytes": 2352
+    },
+    {
+      "path": "tools/intro_audio.py",
+      "status": "modified",
+      "sha256": "8bd70fed9e5cd4d8eac73751122729090ade25b7c080e93e4a8b8c6cfaf47114",
+      "bytes": 5353
+    },
+    {
+      "path": "tools/render_brand.py",
+      "status": "added",
+      "sha256": "b6f29563090d342a4678a4603befe900ec2a30d345f34c547a112b0c92525413",
+      "bytes": 3944
+    },
+    {
+      "path": "tools/render_intro.py",
+      "status": "modified",
+      "sha256": "86145eef8adcb6042f54b804de61b8216dd122ec4ba77b3561a26b539be792b3",
+      "bytes": 11731
+    },
+    {
+      "path": "tools/smoke-test.mjs",
+      "status": "unchanged",
+      "sha256": "d60d59a67a2f88f12d8f9ab25497339393b47c2185c2e9842761869a62af03f9",
+      "bytes": 10682
+    },
+    {
+      "path": "tv/.gitignore",
+      "status": "unchanged",
+      "sha256": "69ce49a76c3cd4cb09d1b42285fe1f4e8ee3ad98825e283f08d70b8f0e54a160",
+      "bytes": 81
+    },
+    {
+      "path": "tv/README.md",
+      "status": "unchanged",
+      "sha256": "f37b342f4bf3351c85863d17ae1f58a2618685d8ff92c9705a5a095c18b47a46",
+      "bytes": 2191
+    },
+    {
+      "path": "tv/app/build.gradle.kts",
+      "status": "modified",
+      "sha256": "b1e27011a622bf6f630802b139a7c3029b47c4659483d09345ba2f3604cc1cdb",
+      "bytes": 3991
+    },
+    {
+      "path": "tv/app/proguard-rules.pro",
+      "status": "unchanged",
+      "sha256": "7e5d1bb94d9467f85c759f2354b48104327b567d9fff092afe9a58a222c2e264",
+      "bytes": 159
+    },
+    {
+      "path": "tv/app/src/androidTest/assets/synthetic-video.mp4",
+      "status": "added",
+      "sha256": "074c1a3755c8327e7da70c815611626eb058832749bf19f8c83e5029b9953cbf",
+      "bytes": 48463
+    },
+    {
+      "path": "tv/app/src/androidTest/java/com/notdxbi/dxbi/tv/IsolationTest.kt",
+      "status": "added",
+      "sha256": "529087d9e18a3bad0765d3120ec2d22843078b9e728ef7a12bf2dc8a8eab6295",
+      "bytes": 3178
+    },
+    {
+      "path": "tv/app/src/androidTest/java/com/notdxbi/dxbi/tv/LocalProfilesTest.kt",
+      "status": "added",
+      "sha256": "ebcbe8f341f798d32bb4ef83d8a01b17073d91f60d730007bca62b8cf51d528a",
+      "bytes": 5708
+    },
+    {
+      "path": "tv/app/src/androidTest/java/com/notdxbi/dxbi/tv/LocalTvLiveTest.kt",
+      "status": "added",
+      "sha256": "e612391505a89bee42a0c52b401274b2a6a823f7aa6999699ff1c860f323576c",
+      "bytes": 4929
+    },
+    {
+      "path": "tv/app/src/androidTest/java/com/notdxbi/dxbi/tv/NativePlaybackTest.kt",
+      "status": "added",
+      "sha256": "124600687b47c47921932cc3c4a7518e577203c73039c7930c5f9922e9a53d70",
+      "bytes": 3556
+    },
+    {
+      "path": "tv/app/src/androidTest/java/com/notdxbi/dxbi/tv/OutboxTest.kt",
+      "status": "added",
+      "sha256": "65109a4eaa4bc0bdc845d7406cc529c91a79c0e18fe043a672a78e1944bc9025",
+      "bytes": 3041
+    },
+    {
+      "path": "tv/app/src/androidTest/java/com/notdxbi/dxbi/tv/PlaybackRecreationTest.kt",
+      "status": "added",
+      "sha256": "da10d17738319cf651b87aafa068273e6a0833ef3ce1464c538a6fa40d68af4a",
+      "bytes": 9164
+    },
+    {
+      "path": "tv/app/src/androidTest/java/com/notdxbi/dxbi/tv/ProfileSwitchTest.kt",
+      "status": "added",
+      "sha256": "22780f0100cbe74ad6c64c487e78a67c8074d760f87e90729310bc0e6e235a45",
+      "bytes": 2047
+    },
+    {
+      "path": "tv/app/src/androidTest/java/com/notdxbi/dxbi/tv/SeriesPlaybackTest.kt",
+      "status": "added",
+      "sha256": "69f2858c3de3a40cb02c3b06529025bed8d0021d6ab18130d69961547ed256fe",
+      "bytes": 9270
+    },
+    {
+      "path": "tv/app/src/androidTest/java/com/notdxbi/dxbi/tv/TvRemoteRepeatTest.kt",
+      "status": "added",
+      "sha256": "06a2cdb334e7778a487f6196fe4a65a6bc0ffb0aac96f36c39f510811c3a8802",
+      "bytes": 3441
+    },
+    {
+      "path": "tv/app/src/main/AndroidManifest.xml",
+      "status": "modified",
+      "sha256": "91fe1bbc46eb0b1693cd46be597cced38c0d57b1cb679df3764595bd48d2bcd4",
+      "bytes": 2678
+    },
+    {
+      "path": "tv/app/src/main/assets/dxbi-tv.js",
+      "status": "modified",
+      "sha256": "3d8dec1efddcde27266d11ad60cef4ffd307d4d2c4f508170673730b84ac4ef2",
+      "bytes": 41545
+    },
+    {
+      "path": "tv/app/src/main/assets/household-native.js",
+      "status": "added",
+      "sha256": "6b9ae39364621b528d052899f7749a7bd31b7b25f7aa61d00a0634f67d75a04a",
+      "bytes": 816
+    },
+    {
+      "path": "tv/app/src/main/assets/local-native.js",
+      "status": "added",
+      "sha256": "87a906d9b5b4cc2fffff57ecd1277caa265e2132779bfdd102da265a1111bf38",
+      "bytes": 631
+    },
+    {
+      "path": "tv/app/src/main/java/com/notdxbi/dxbi/tv/AvSync.kt",
+      "status": "added",
+      "sha256": "3f70df8fbf4a3f8b6d5870c7e85bb18dee89c90130c3a7165e1ff5ff7c187ca9",
+      "bytes": 4710
+    },
+    {
+      "path": "tv/app/src/main/java/com/notdxbi/dxbi/tv/Bridge.kt",
+      "status": "modified",
+      "sha256": "8ac84da265c81c2beb20002cc8207ef788ffafa61d3e4ae5226fad0b41c2d7fc",
+      "bytes": 2423
+    },
+    {
+      "path": "tv/app/src/main/java/com/notdxbi/dxbi/tv/HouseholdActivity.kt",
+      "status": "added",
+      "sha256": "daf7ac0ae59230cc683211bee3a238527f85a23198698f95c9ed26ece6d2d4f3",
+      "bytes": 16230
+    },
+    {
+      "path": "tv/app/src/main/java/com/notdxbi/dxbi/tv/HouseholdPlaybackSync.kt",
+      "status": "added",
+      "sha256": "31deb550a2ac1e9c72ccccaedad18094a7707f72f7c54c8256b225f7c5c9aaf9",
+      "bytes": 6175
+    },
+    {
+      "path": "tv/app/src/main/java/com/notdxbi/dxbi/tv/LocalProfileStore.kt",
+      "status": "added",
+      "sha256": "19ec62babb1c82bfbc9c129246da6668d14edd14084aa8e76e2aaad0b3ab0167",
+      "bytes": 3738
+    },
+    {
+      "path": "tv/app/src/main/java/com/notdxbi/dxbi/tv/MainActivity.kt",
+      "status": "modified",
+      "sha256": "e7d1cfa5130b8c10e47ab1b9d2d71c50651f72605d90868b2433a46691214e87",
+      "bytes": 16656
+    },
+    {
+      "path": "tv/app/src/main/java/com/notdxbi/dxbi/tv/PlaybackBus.kt",
+      "status": "modified",
+      "sha256": "201af7c1564936312878227de580741bad9a699214b023f9e65f56d1de390d89",
+      "bytes": 818
+    },
+    {
+      "path": "tv/app/src/main/java/com/notdxbi/dxbi/tv/PlayerActivity.kt",
+      "status": "modified",
+      "sha256": "1f31b7ef96ba7c0f1f222443e69c05459630ee2e585c9434ccd7df22a4815d5f",
+      "bytes": 23246
+    },
+    {
+      "path": "tv/app/src/main/java/com/notdxbi/dxbi/tv/ProfileCleanup.kt",
+      "status": "added",
+      "sha256": "50a2040ede2ae99fb30c61b48267bb1236b5fdf5d03eb7eb807e8676583c189e",
+      "bytes": 1218
+    },
+    {
+      "path": "tv/app/src/main/java/com/notdxbi/dxbi/tv/SecureStore.kt",
+      "status": "added",
+      "sha256": "eead77ba8d33b69863402241271b30b293e568e85239e44af6fc13cd787fd13d",
+      "bytes": 2909
+    },
+    {
+      "path": "tv/app/src/main/java/com/notdxbi/dxbi/tv/SeriesPlayback.kt",
+      "status": "added",
+      "sha256": "a7f1e1833e438b7b5bc0c3005ba9df8695741c8459c1b947697d449656536d07",
+      "bytes": 15211
+    },
+    {
+      "path": "tv/app/src/main/java/com/notdxbi/dxbi/tv/TracksPanel.kt",
+      "status": "added",
+      "sha256": "eaa3e649921fe7be6bc7b62a853237b21a2f7b6d9a9fad6f4944e1277dce3653",
+      "bytes": 16536
+    },
+    {
+      "path": "tv/app/src/main/java/com/notdxbi/dxbi/tv/Updates.kt",
+      "status": "modified",
+      "sha256": "d3bf8f0f39e3311eb81096c6aa19a558275f14e5d9f3ae304e3b3867c4506eeb",
+      "bytes": 6253
+    },
+    {
+      "path": "tv/app/src/main/res/color/panel_button_text.xml",
+      "status": "added",
+      "sha256": "e1ae231ea8b34b47eacfb26d3b8139f585c9907e34ca31c2c4734b38c02f5d17",
+      "bytes": 228
+    },
+    {
+      "path": "tv/app/src/main/res/drawable/banner.png",
+      "status": "modified",
+      "sha256": "f739f53fac1e15950132bc71c4d1b40ec6a0116b1a94c38cfee0e4e367f0a55d",
+      "bytes": 22998
+    },
+    {
+      "path": "tv/app/src/main/res/drawable/control_focus.xml",
+      "status": "added",
+      "sha256": "3de29219c59f68d7efcceba1a874a041b1699007d65e202d4b19478486f0c46a",
+      "bytes": 507
+    },
+    {
+      "path": "tv/app/src/main/res/drawable/flash_bg.xml",
+      "status": "unchanged",
+      "sha256": "2c136b27718c573a1e3a111ab93bf85de6b8c5694e758d121ef1bc68f8517b4f",
+      "bytes": 193
+    },
+    {
+      "path": "tv/app/src/main/res/drawable/ic_episodes.xml",
+      "status": "added",
+      "sha256": "3875cc434476442acc61139429b4e53be12269cc0f8f7c5553e563e10368babf",
+      "bytes": 599
+    },
+    {
+      "path": "tv/app/src/main/res/drawable/ic_next_episode.xml",
+      "status": "added",
+      "sha256": "9d218168dd408ac87e5a31b91a31577877201bdbbf99e2f706bbe14bb49f3405",
+      "bytes": 497
+    },
+    {
+      "path": "tv/app/src/main/res/drawable/panel_button.xml",
+      "status": "added",
+      "sha256": "bf4490567f5e40902ed67737d01763d6a0d3e5228988d76f66da08ef50d994cb",
+      "bytes": 543
+    },
+    {
+      "path": "tv/app/src/main/res/drawable/start_scrim.xml",
+      "status": "added",
+      "sha256": "c1672afbdb5021dc32dc0a983de34e51d328d4e9620645842b865dbc9680c32f",
+      "bytes": 334
+    },
+    {
+      "path": "tv/app/src/main/res/drawable/title_scrim.xml",
+      "status": "unchanged",
+      "sha256": "a525e740e6f86bd86f824626d4ad8c9e9c4c0ec0d2b70adc5a2572d20f9adc95",
+      "bytes": 212
+    },
+    {
+      "path": "tv/app/src/main/res/layout/activity_player.xml",
+      "status": "modified",
+      "sha256": "5999b88bf4fbae1af32d710766b97d33a283a9c2132697257d08567d65ea315b",
+      "bytes": 7002
+    },
+    {
+      "path": "tv/app/src/main/res/mipmap-hdpi/ic_launcher.png",
+      "status": "modified",
+      "sha256": "231750954c7cde1c1cbd7378d21f3a4c83941ac4aebd77cc45a31559287357ef",
+      "bytes": 2702
+    },
+    {
+      "path": "tv/app/src/main/res/mipmap-mdpi/ic_launcher.png",
+      "status": "modified",
+      "sha256": "5031424a0ceafa6a91543e86277ea7a49dd1c5d079202040dd9042011d4e9e1b",
+      "bytes": 1717
+    },
+    {
+      "path": "tv/app/src/main/res/mipmap-xhdpi/ic_launcher.png",
+      "status": "modified",
+      "sha256": "5bd4058f6606cfdbd8de4d0bf91d067372dd16a7216c95f15db5a953e85de918",
+      "bytes": 3810
+    },
+    {
+      "path": "tv/app/src/main/res/mipmap-xxhdpi/ic_launcher.png",
+      "status": "modified",
+      "sha256": "648cc6d61808c93e069cea521b51edbd756da6777c8b51612063c23f3c70b80e",
+      "bytes": 6808
+    },
+    {
+      "path": "tv/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png",
+      "status": "modified",
+      "sha256": "42be9fd9caf64802a07da55ba0f4e99c239e2ed338ee3d90c06cfc20e9478988",
+      "bytes": 9493
+    },
+    {
+      "path": "tv/app/src/main/res/values/colors.xml",
+      "status": "unchanged",
+      "sha256": "a724c6654a1c0cd66b37e8f9964500193c5d5f21e51fe254a22b838632ccaa89",
+      "bytes": 111
+    },
+    {
+      "path": "tv/app/src/main/res/values/strings.xml",
+      "status": "modified",
+      "sha256": "4dfb991b4c757d0d03372e41e3820f3cb6a6945a78d89e20ae76d76a63ff4908",
+      "bytes": 82
+    },
+    {
+      "path": "tv/app/src/main/res/values/themes.xml",
+      "status": "unchanged",
+      "sha256": "a9f934729a4f3647fab6d3e24ec8ab9a7c47a95d6dcb3f66ba3801701cf28f70",
+      "bytes": 475
+    },
+    {
+      "path": "tv/app/src/main/res/xml/network_security.xml",
+      "status": "unchanged",
+      "sha256": "05140bb4f83b56f0dae681b7176ac9535e560a31b8ec27233b707ce0a52495a8",
+      "bytes": 343
+    },
+    {
+      "path": "tv/app/src/main/res/xml/update_paths.xml",
+      "status": "unchanged",
+      "sha256": "4a6796b52cd910c17cf41344ac00e5f09880791be1f6f45a45d18f11ba80e198",
+      "bytes": 106
+    },
+    {
+      "path": "tv/build.gradle.kts",
+      "status": "unchanged",
+      "sha256": "50425357e4449207a6e3098fa4f4dc66864a870859025051fc809589ddb858df",
+      "bytes": 142
+    },
+    {
+      "path": "tv/gradle.properties",
+      "status": "unchanged",
+      "sha256": "782f39e29894758ffbc7acb255e39a6b644d7a22d695ab89aceb6d7ea0ecebb3",
+      "bytes": 133
+    },
+    {
+      "path": "tv/gradle/wrapper/gradle-wrapper.jar",
+      "status": "unchanged",
+      "sha256": "2db75c40782f5e8ba1fc278a5574bab070adccb2d21ca5a6e5ed840888448046",
+      "bytes": 43583
+    },
+    {
+      "path": "tv/gradle/wrapper/gradle-wrapper.properties",
+      "status": "unchanged",
+      "sha256": "d7010368a34c1c06df2bae1a85d8b24c39b2499c74ac892fc7e66d005dbd7b8a",
+      "bytes": 253
+    },
+    {
+      "path": "tv/gradlew",
+      "status": "unchanged",
+      "sha256": "a3648413b47ef77af21d5ebc36c687c7d103aaef3e17f33de7d4f080a6f300a3",
+      "bytes": 8762
+    },
+    {
+      "path": "tv/gradlew.bat",
+      "status": "unchanged",
+      "sha256": "2209f919a22528af59a2af2ad97e8d056cca18e39f7d87aa3fd549a73b180150",
+      "bytes": 2872
+    },
+    {
+      "path": "tv/settings.gradle.kts",
+      "status": "unchanged",
+      "sha256": "f5d58748d41c25cf24f8dea8ef5936d7bf30538c4768c606f5d7e7f477b4e736",
+      "bytes": 325
+    }
+  ]
+}

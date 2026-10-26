@@ -1,0 +1,4343 @@
+/**
+ * @name Stremflix
+ * @description Cinematic, Netflix-inspired interface for Stremflix. Pair it with the Stremflix plugin for the billboard, carousels, previews, ratings and player extras.
+ * @version 2.14.3
+ * @author dx.bi
+ * @requirements ["dxbi.plugin.js"]
+ * @updateUrl https://raw.githubusercontent.com/notdxbi/dxbi-stremio/main/dxbi.theme.css
+ */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300..800&family=Bebas+Neue&display=swap");
+
+/* Country flags drawn the same on every OS: Windows has no flag emoji and shows letters ("GB")
+   instead. A flag-only font (Twemoji Country Flags, 78 KB), downloaded only when a flag is on screen. */
+@font-face {
+    font-family: "Twemoji Country Flags";
+    unicode-range: U+1F1E6-1F1FF, U+1F3F4, U+E0062-E0063, U+E0065, U+E0067, U+E006C, U+E006E, U+E0073-E0074, U+E0077, U+E007F;
+    src: url("https://cdn.jsdelivr.net/npm/country-flag-emoji-polyfill@0.1.8/dist/TwemojiCountryFlags.woff2") format("woff2");
+    font-display: swap;
+}
+
+/* =====================================================================
+   1. TOKENS
+   ===================================================================== */
+
+:root {
+    /* Accent is overridable by the plugin (Settings → Stremflix) */
+    --dx-accent: #e50914;
+    --dx-accent-hover: color-mix(in srgb, var(--dx-accent) 85%, white);
+    --dx-accent-soft: color-mix(in srgb, var(--dx-accent) 18%, transparent);
+
+    --dx-bg: #0b0b0d;
+    --dx-bg-raised: #131317;
+    --dx-surface: #18181d;
+    --dx-surface-2: #212128;
+    --dx-surface-3: #2b2b33;
+    --dx-line: rgba(255, 255, 255, 0.08);
+    --dx-line-strong: rgba(255, 255, 255, 0.16);
+
+    --dx-text: #f4f4f5;
+    --dx-text-2: #c4c4cc;
+    --dx-text-3: #8a8a96;
+
+    --dx-radius-s: 4px;
+    --dx-radius: 8px;
+    --dx-radius-l: 14px;
+
+    --dx-gutter: clamp(1.25rem, 4vw, 4.5rem);
+    --dx-nav-h: 4.25rem;
+    --dx-cols: 7;
+
+    --dx-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+    --dx-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --dx-shadow-1: 0 2px 10px rgba(0, 0, 0, 0.35);
+    --dx-shadow-2: 0 18px 50px rgba(0, 0, 0, 0.6);
+
+    /* Stremio's own variables — recolours every stock component at once */
+    --primary-background-color: var(--dx-bg);
+    --secondary-background-color: var(--dx-bg);
+    --primary-foreground-color: var(--dx-text);
+    --secondary-foreground-color: var(--dx-bg);
+    --primary-accent-color: var(--dx-accent);
+    --secondary-accent-color: var(--dx-accent);
+    --tertiary-accent-color: #f5c518;
+    --overlay-color: rgba(255, 255, 255, 0.07);
+    --modal-background-color: var(--dx-surface);
+    --outer-glow: 0 0 0 transparent;
+    --border-radius: var(--dx-radius);
+    --horizontal-nav-bar-size: var(--dx-nav-h);
+    --color-placeholder: rgba(255, 255, 255, 0.05);
+    --color-placeholder-background: rgba(255, 255, 255, 0.04);
+}
+
+@media (max-width: 2200px) { :root { --dx-cols: 7; --dx-wide-cols: 4.6; } }
+@media (max-width: 1800px) { :root { --dx-cols: 6; --dx-wide-cols: 4.2; } }
+@media (max-width: 1400px) { :root { --dx-cols: 5; --dx-wide-cols: 3.6; } }
+@media (max-width: 1050px) { :root { --dx-cols: 4; --dx-wide-cols: 2.6; } }
+@media (min-width: 2201px) { :root { --dx-cols: 8; --dx-wide-cols: 5.4; } }
+
+/* =====================================================================
+   2. BASE
+   ===================================================================== */
+
+html,
+html body {
+    background: var(--dx-bg) !important;
+    font-family: "Twemoji Country Flags", "Inter", "PlusJakartaSans", system-ui, sans-serif !important;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+#app,
+#app * {
+    font-family: "Twemoji Country Flags", "Inter", "PlusJakartaSans", system-ui, sans-serif;
+}
+
+::selection {
+    background: var(--dx-accent);
+    color: #fff;
+}
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.14);
+    border-radius: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* Smooth page entry */
+#app .animation-fade-in {
+    animation: dx-rise 0.5s var(--dx-ease-out) both !important;
+}
+
+@keyframes dx-rise {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: none; }
+}
+
+@keyframes dx-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* =====================================================================
+   3. TOP NAVIGATION (main pages)
+   ===================================================================== */
+
+#app [class*="main-nav-bars-container"] > nav[class*="horizontal-nav-bar"] {
+    z-index: 5;
+    height: var(--dx-nav-h);
+    padding: 0 var(--dx-gutter);
+    gap: 1.25rem;
+    justify-content: flex-start;
+    background: var(--dx-bg);
+    transition: background-color 0.35s var(--dx-ease), box-shadow 0.35s var(--dx-ease);
+}
+
+/* Board: header floats over the billboard and turns solid on scroll */
+body[data-dx-route="board"] #app [class*="main-nav-bars-container"] > nav[class*="horizontal-nav-bar"] {
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.72) 0%, rgba(0, 0, 0, 0.25) 70%, transparent 100%);
+}
+
+body.dx-scrolled #app [class*="main-nav-bars-container"] > nav[class*="horizontal-nav-bar"] {
+    background-color: rgba(11, 11, 13, 0.97);
+    box-shadow: 0 1px 0 var(--dx-line), 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+/* Wordmark */
+#app nav[class*="horizontal-nav-bar"] [class*="logo-container"] {
+    flex: none;
+    margin-right: auto;
+    width: 9.5rem;
+    height: var(--dx-nav-h);
+    justify-content: flex-start;
+    order: 0;
+}
+
+#app nav[class*="horizontal-nav-bar"] [class*="logo-container"] img {
+    display: none !important;
+}
+
+#app nav[class*="horizontal-nav-bar"] [class*="logo-container"]::before {
+    content: "STREMFLIX";
+    font-family: "Bebas Neue", "Inter", sans-serif;
+    font-size: 2.35rem;
+    line-height: 1;
+    letter-spacing: 0.05em;
+    color: var(--dx-accent);
+    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.45);
+    transform: translateY(2px);
+}
+
+/* Tabs: the stock vertical bar becomes a row of text links beside the logo */
+#app [class*="main-nav-bars-container"] > nav[class*="vertical-nav-bar"] {
+    top: 0;
+    bottom: auto;
+    left: calc(var(--dx-gutter) + 9.5rem + 1.5rem);
+    z-index: 6;
+    width: auto;
+    height: var(--dx-nav-h);
+    padding: 0;
+    flex-direction: row;
+    align-items: center;
+    gap: 1.75rem;
+    background: transparent;
+    overflow: visible;
+}
+
+#app nav[class*="vertical-nav-bar"] a[class*="nav-tab-button"] {
+    position: relative;
+    width: auto;
+    height: auto;
+    min-height: 0;
+    padding: 0.4rem 0;
+    flex-direction: row;
+    border-radius: 0;
+    background: transparent !important;
+    overflow: visible;
+}
+
+#app nav[class*="vertical-nav-bar"] a[class*="nav-tab-button"] svg {
+    display: none;
+}
+
+#app nav[class*="vertical-nav-bar"] a[class*="nav-tab-button"] [class*="label"] {
+    display: block;
+    max-height: none;
+    padding: 0;
+    margin: 0;
+    font-size: 0.92rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    text-transform: capitalize;
+    color: var(--dx-nav-label, var(--dx-text-2));
+    opacity: 1;
+    overflow: visible;
+    white-space: nowrap;
+    transition: color 0.25s var(--dx-ease);
+}
+
+/* Hover effects below set a variable on the hovered element itself, never "hovered [class*=x]":
+   that shape makes the browser restyle the whole page on every hover change. */
+#app nav[class*="vertical-nav-bar"] a[class*="nav-tab-button"]:hover,
+#app nav[class*="vertical-nav-bar"] a[class*="nav-tab-button"]:focus-visible {
+    --dx-nav-label: var(--dx-text);
+}
+
+#app nav[class*="vertical-nav-bar"] a[class*="nav-tab-button"].selected [class*="label"] {
+    color: #fff;
+    font-weight: 700;
+}
+
+#app nav[class*="vertical-nav-bar"] a[class*="nav-tab-button"]::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -0.15rem;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--dx-accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.35s var(--dx-ease-out);
+}
+
+#app nav[class*="vertical-nav-bar"] a[class*="nav-tab-button"].selected::after {
+    transform: scaleX(1);
+}
+
+/* "Board" reads as "Home" */
+#app nav[class*="vertical-nav-bar"] a[href="#/"] [class*="label"] {
+    font-size: 0 !important;
+}
+
+#app nav[class*="vertical-nav-bar"] a[href="#/"] [class*="label"]::after {
+    content: "Home";
+    font-size: 0.92rem;
+}
+
+/* Search: compact field on the right */
+#app [class*="main-nav-bars-container"] nav[class*="horizontal-nav-bar"] [class*="search-bar-container"] {
+    flex: none;
+    order: 1;
+    width: 15rem;
+    height: 2.4rem;
+    padding: 0 0.35rem 0 0.9rem;
+    border-radius: var(--dx-radius);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--dx-line);
+    transition: width 0.4s var(--dx-ease-out), background-color 0.25s, border-color 0.25s;
+}
+
+#app [class*="main-nav-bars-container"] nav[class*="horizontal-nav-bar"] [class*="search-bar-container"]:hover,
+#app [class*="main-nav-bars-container"] nav[class*="horizontal-nav-bar"] [class*="search-bar-container"]:focus-visible {
+    background: rgba(255, 255, 255, 0.09);
+}
+
+#app [class*="main-nav-bars-container"] nav[class*="horizontal-nav-bar"] [class*="search-bar-container"]:focus-within,
+#app [class*="main-nav-bars-container"] nav[class*="horizontal-nav-bar"] [class*="search-bar-container"].active {
+    width: 22rem;
+    background: rgba(0, 0, 0, 0.85);
+    border-color: rgba(255, 255, 255, 0.55);
+}
+
+#app nav[class*="horizontal-nav-bar"] [class*="search-bar-container"] [class*="search-input"],
+#app nav[class*="horizontal-nav-bar"] [class*="search-bar-container"] input {
+    font-size: 0.9rem;
+    color: var(--dx-text);
+}
+
+#app nav[class*="horizontal-nav-bar"] [class*="search-bar-container"] [class*="placeholder-label"] {
+    font-size: 0.9rem;
+    color: var(--dx-text-3);
+    opacity: 1;
+}
+
+#app nav[class*="horizontal-nav-bar"] [class*="search-bar-container"] [class*="submit-button-container"] {
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border-radius: var(--dx-radius-s);
+}
+
+#app nav[class*="horizontal-nav-bar"] [class*="search-bar-container"] svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    color: var(--dx-text-2);
+    opacity: 1;
+}
+
+/* Right-hand buttons */
+#app nav[class*="horizontal-nav-bar"] [class*="buttons-container"] {
+    flex: none;
+    order: 2;
+    gap: 0.35rem;
+}
+
+#app nav[class*="horizontal-nav-bar"] [class*="buttons-container"] > [class*="button-container"] {
+    height: 2.5rem;
+    min-width: 2.5rem;
+    border-radius: var(--dx-radius);
+    background: transparent;
+    transition: background-color 0.2s;
+}
+
+#app nav[class*="horizontal-nav-bar"] [class*="buttons-container"] > [class*="button-container"]:hover,
+#app nav[class*="horizontal-nav-bar"] [class*="buttons-container"] > [class*="button-container"]:focus-visible {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+#app nav[class*="horizontal-nav-bar"] [class*="buttons-container"] svg {
+    width: 1.3rem;
+    height: 1.3rem;
+    color: var(--dx-text);
+    opacity: 0.9;
+}
+
+#app nav[class*="horizontal-nav-bar"] [class*="avatar"] {
+    width: 2rem;
+    height: 2rem;
+    border: 0 !important;
+    border-radius: var(--dx-radius-s) !important;
+}
+
+#app nav[class*="horizontal-nav-bar"] [class*="avatar"] img {
+    border-radius: var(--dx-radius-s) !important;
+}
+
+/* Content starts under the header; full width (no sidebar) */
+#app [class*="main-nav-bars-container"] > [class*="nav-content-container"] {
+    top: var(--dx-nav-h);
+    left: 0;
+}
+
+body[data-dx-route="board"] #app [class*="board-container"] [class*="nav-content-container"] {
+    top: 0;
+}
+
+/* Narrower windows */
+@media (max-width: 1450px) {
+    #app [class*="main-nav-bars-container"] > nav[class*="vertical-nav-bar"] {
+        gap: 1.25rem;
+    }
+
+    #app [class*="main-nav-bars-container"] nav[class*="horizontal-nav-bar"] [class*="search-bar-container"] {
+        width: 2.6rem;
+        padding: 0 0.25rem;
+        background: transparent;
+        border-color: transparent;
+    }
+
+    #app [class*="main-nav-bars-container"] nav[class*="horizontal-nav-bar"] [class*="search-bar-container"] [class*="search-input"] {
+        opacity: var(--dx-search-open, 0);
+    }
+
+    #app [class*="main-nav-bars-container"] nav[class*="horizontal-nav-bar"] [class*="search-bar-container"]:focus-within,
+    #app [class*="main-nav-bars-container"] nav[class*="horizontal-nav-bar"] [class*="search-bar-container"].active {
+        position: relative;
+        z-index: 7;
+        width: 18rem;
+        padding: 0 0.35rem 0 0.9rem;
+        --dx-search-open: 1;
+    }
+}
+
+@media (max-width: 1000px) {
+    #app nav[class*="vertical-nav-bar"] a[class*="nav-tab-button"] [class*="label"] {
+        display: none;
+    }
+
+    #app nav[class*="vertical-nav-bar"] a[class*="nav-tab-button"] svg {
+        display: block;
+        width: 1.35rem;
+        height: 1.35rem;
+        color: var(--dx-text-2);
+    }
+
+    #app nav[class*="vertical-nav-bar"] a[class*="nav-tab-button"].selected svg {
+        color: #fff;
+    }
+}
+
+/* =====================================================================
+   4. BOARD — rows become carousels
+   ===================================================================== */
+
+#app [class*="board-content-"]:not([class*="board-content-container"]) {
+    padding: 0 0 4rem 0 !important;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+}
+
+/* No billboard (plugin off): keep rows clear of the floating header */
+#app [class*="board-content-"]:not([class*="board-content-container"]):not(:has(> .dx-hero)) {
+    padding-top: calc(var(--dx-nav-h) + 1rem) !important;
+}
+
+#app [class*="board-content-"]:not([class*="board-content-container"]) [class*="board-row"],
+#app [class*="search-content"] [class*="search-row"] {
+    position: relative;
+    margin: 0 0 1.4rem 0 !important;
+}
+
+/* Rows that only show an addon error are noise — hide them */
+#app [class*="board-content-"]:not([class*="board-content-container"]) [class*="board-row"]:has(> [class*="message-container"]),
+#app [class*="search-content"] [class*="search-row"]:has(> [class*="message-container"]) {
+    display: none !important;
+}
+
+#app [class*="meta-row"] > [class*="header-container"] {
+    padding: 0 var(--dx-gutter) !important;
+    margin: 0 0 0.1rem 0;
+    height: 2.5rem;
+}
+
+#app [class*="meta-row"] > [class*="header-container"] [class*="title-container"] {
+    font-size: clamp(1.05rem, 1.25vw, 1.45rem) !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.005em;
+    color: var(--dx-text);
+    max-height: none;
+}
+
+#app [class*="meta-row"] > [class*="header-container"] [class*="title-container"] [class*="title"] {
+    font-size: inherit !important;
+    font-weight: inherit !important;
+}
+
+#app [class*="meta-row"] [class*="see-all-container"] {
+    height: 2rem;
+    padding: 0 0.4rem 0 0.75rem;
+    border-radius: var(--dx-radius-s);
+    opacity: var(--dx-row-hot, 0);
+    transform: translateX(calc(6px * (var(--dx-row-hot, 0) - 1)));
+    transition: opacity 0.3s, transform 0.3s var(--dx-ease-out), background-color 0.2s;
+}
+
+#app [class*="meta-row"]:hover,
+#app [class*="meta-row"]:focus-visible {
+    --dx-row-hot: 1;
+}
+
+#app [class*="meta-row"] [class*="see-all-container"]:hover,
+#app [class*="meta-row"] [class*="see-all-container"]:focus-visible {
+    background: rgba(255, 255, 255, 0.07);
+}
+
+#app [class*="meta-row"] [class*="see-all-container"] [class*="label"] {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--dx-text-2);
+}
+
+#app [class*="meta-row"] [class*="see-all-container"] svg {
+    height: 1rem;
+    color: var(--dx-text-2);
+}
+
+/* Rows fade softly into the screen edges: titles that slide aside for a hover card (or peek in
+   from a scrolled row) glide out of view instead of being sliced off at the edge */
+#app [class*="board-content-"]:not([class*="board-content-container"]) [class*="meta-row"] > [class*="meta-items-container"],
+#app [class*="search-content"] [class*="meta-row"] > [class*="meta-items-container"] {
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 calc(var(--dx-gutter) - 0.6rem), #000 calc(100% - var(--dx-gutter) + 0.6rem), transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0, #000 calc(var(--dx-gutter) - 0.6rem), #000 calc(100% - var(--dx-gutter) + 0.6rem), transparent 100%);
+}
+
+/* The track */
+#app [class*="board-content-"]:not([class*="board-content-container"]) [class*="meta-row"] > [class*="meta-items-container"],
+#app [class*="search-content"] [class*="meta-row"] > [class*="meta-items-container"] {
+    display: flex !important;
+    flex-wrap: nowrap;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scroll-behavior: smooth;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: var(--dx-gutter);
+    scrollbar-width: none;
+    padding: 0.9rem calc(var(--dx-gutter) - 0.35rem) 1.1rem;
+    margin: -0.65rem 0 -0.35rem;
+    overscroll-behavior-x: contain;
+}
+
+#app [class*="board-content-"]:not([class*="board-content-container"]) [class*="meta-row"] > [class*="meta-items-container"]::-webkit-scrollbar,
+#app [class*="search-content"] [class*="meta-row"] > [class*="meta-items-container"]::-webkit-scrollbar {
+    display: none;
+}
+
+/* Show every item (stock hides some by screen width) */
+#app [class*="board-content-"]:not([class*="board-content-container"]) [class*="meta-row"] > [class*="meta-items-container"] > *,
+#app [class*="search-content"] [class*="meta-row"] > [class*="meta-items-container"] > * {
+    display: block !important;
+    flex: 0 0 calc(100% / var(--dx-cols)) !important;
+    max-width: none !important;
+    padding: 0 0.35rem !important;
+    scroll-snap-align: start;
+}
+
+#app [class*="board-content-"]:not([class*="board-content-container"]) [class*="meta-row"] > [class*="meta-items-container"] > *:empty,
+#app [class*="search-content"] [class*="meta-row"] > [class*="meta-items-container"] > *:empty {
+    display: none !important;
+}
+
+/* Landscape rows (and Continue Watching, made landscape by the plugin) */
+#app [class*="board-content-"]:not([class*="board-content-container"]) [class*="board-row-landscape"] > [class*="meta-items-container"] > *,
+#app [class*="board-content-"]:not([class*="board-content-container"]) [class*="continue-watching-row"][data-dx-wide-row] > [class*="meta-items-container"] > * {
+    flex-basis: calc(100% / var(--dx-wide-cols, 4)) !important;
+}
+
+/* =====================================================================
+   5. POSTER CARDS (everywhere)
+   ===================================================================== */
+
+#app [class*="meta-item-container"] {
+    padding: 0.5rem 0.35rem;
+    transition: transform 0.35s var(--dx-ease-out);
+}
+
+#app [class*="meta-item-container"] [class*="poster-container"] {
+    border-radius: var(--dx-radius) !important;
+    background: var(--dx-surface);
+    box-shadow: none !important;
+    overflow: hidden;
+    transform: translate3d(0, calc(-4px * var(--dx-card-focus, 0)), 0) scale(calc(1 + 0.035 * var(--dx-card-focus, 0)));
+    transition: transform 0.35s var(--dx-ease-out), box-shadow 0.35s var(--dx-ease-out) !important;
+}
+
+#app [class*="meta-item-container"] [class*="poster-container"]::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+    pointer-events: none;
+    z-index: 5;
+    transition: box-shadow 0.3s;
+}
+
+#app [class*="meta-item-container"]:is(.hovered, .active, .selected) [class*="poster-container"] {
+    box-shadow: var(--dx-shadow-2) !important;
+    transform: translateY(-4px) scale(1.035);
+}
+
+/* keyboard highlight: the poster lifts like it does under the mouse, and the hover card shows
+   what's selected: no outline or ring around the card */
+#app [class*="meta-item-link"]:focus-visible {
+    --dx-card-focus: 1;
+    outline: none !important;
+}
+
+#app [class*="meta-item-container"]:active:not(.active) {
+    --dx-card-press: 1;
+}
+
+#app [class*="meta-item-container"] [class*="poster-container"] {
+    scale: calc(1 - 0.03 * var(--dx-card-press, 0));
+}
+
+#app [class*="meta-item-container"]:is(.hovered, .active, .selected) [class*="poster-container"]::after {
+    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.85);
+}
+
+#app [class*="meta-item-container"] [class*="poster-image-layer"] {
+    transition: transform 0.6s var(--dx-ease-out) !important;
+}
+
+#app [class*="meta-item-container"].hovered [class*="poster-image-layer"] {
+    transform: scale(1.04) !important;
+}
+
+#app [class*="meta-item-container"] [class*="poster-image"] {
+    object-fit: cover;
+}
+
+
+/* Titles under cards: quiet, single line */
+#app [class*="meta-item-container"] [class*="title-bar-container"] {
+    height: auto;
+    min-height: 0;
+    padding: 0.55rem 0.15rem 0 0.15rem;
+    justify-content: flex-start;
+}
+
+#app [class*="meta-item-container"] [class*="title-bar-container"] [class*="title-label"] {
+    padding: 0;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--dx-text-2);
+    text-align: left;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-height: 1.3em;
+    transition: color 0.2s;
+}
+
+#app [class*="meta-item-container"].hovered [class*="title-bar-container"] [class*="title-label"] {
+    color: var(--dx-text);
+}
+
+/* Rows on Home/Search: artwork only, like the real thing (titles live in the preview card) */
+#app [class*="board-content-"]:not([class*="board-content-container"]) [class*="meta-row"] [class*="meta-item-container"] [class*="title-bar-container"],
+#app [class*="search-content"] [class*="meta-row"] [class*="meta-item-container"] [class*="title-bar-container"] {
+    display: none;
+}
+
+/* Progress */
+#app [class*="meta-item-container"] [class*="progress-bar-layer"] {
+    left: 0.6rem;
+    right: 0.6rem;
+    bottom: 0.6rem;
+    height: 3px;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+#app [class*="progress-bar-layer"] [class*="progress-bar-background"] {
+    background: rgba(255, 255, 255, 0.28) !important;
+    opacity: 1 !important;
+}
+
+#app [class*="progress-bar-layer"] [class*="progress-bar"]:not([class*="background"]),
+#app [class*="progress-bar-container"] [class*="progress-bar"]:not([class*="background"]) {
+    background: var(--dx-accent) !important;
+}
+
+/* Play overlay on Continue Watching */
+#app [class*="meta-item-container"] [class*="play-icon-layer"] {
+    opacity: 0;
+    transition: opacity 0.25s;
+}
+
+#app [class*="meta-item-container"].hovered [class*="play-icon-layer"] {
+    opacity: 1;
+}
+
+#app [class*="meta-item-container"] [class*="play-icon-background"] {
+    background: rgba(0, 0, 0, 0.55) !important;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    opacity: 1 !important;
+    backdrop-filter: blur(6px);
+}
+
+#app [class*="meta-item-container"].hovered [class*="play-icon-background"] {
+    background: var(--dx-accent) !important;
+    border-color: var(--dx-accent);
+}
+
+#app [class*="meta-item-container"] [class*="play-icon-outer"] {
+    display: none;
+}
+
+/* Watched tick */
+#app [class*="meta-item-container"] [class*="watched-icon-layer"] {
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 50%;
+    backdrop-filter: blur(4px);
+}
+
+#app [class*="meta-item-container"] [class*="watched-icon"] {
+    color: #fff;
+}
+
+/* "New episodes" stack */
+#app [class*="meta-item-container"] [class*="new-videos"] [class*="layer"]:last-child {
+    background: var(--dx-accent) !important;
+    border-radius: var(--dx-radius-s);
+}
+
+#app [class*="meta-item-container"] [class*="new-videos"] [class*="layer"]:not(:last-child) {
+    background: color-mix(in srgb, var(--dx-accent) 55%, black) !important;
+}
+
+#app [class*="meta-item-container"] [class*="new-videos"] [class*="label"],
+#app [class*="meta-item-container"] [class*="new-videos"] svg {
+    color: #fff !important;
+}
+
+/* Dismiss on Continue Watching: a slim glass tab that opens out into "Remove" when pointed at.
+   It takes the corner from the "+N new episodes" badge while the card is hovered. */
+#app [class*="meta-item-container"] [class*="dismiss-icon-layer"] {
+    z-index: 7 !important;
+    top: 0.6rem;
+    left: auto;
+    right: 0.6rem;
+    width: auto !important;
+    height: 1.55rem !important;
+    min-width: 1.55rem;
+    padding: 0 0.42rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.4rem;
+    background: rgba(12, 12, 14, 0.62);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16), 0 4px 14px rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    transform: translateY(-2px);
+    transition: opacity 0.18s ease, transform 0.18s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+#app [class*="meta-item-container"].hovered [class*="dismiss-icon-layer"],
+#app [class*="meta-item-container"] [class*="dismiss-icon-layer"]:focus-visible {
+    opacity: 1;
+    transform: none;
+}
+
+#app [class*="meta-item-container"] [class*="dismiss-icon-backdrop"] {
+    display: none !important;
+}
+
+#app [class*="meta-item-container"] [class*="dismiss-icon-layer"] svg {
+    position: static !important;
+    flex: none;
+    width: 0.62rem !important;
+    height: 0.62rem !important;
+    color: #fff !important;
+    fill: currentColor !important;
+    opacity: 1;
+}
+
+#app [class*="meta-item-container"] [class*="dismiss-icon-layer"]::before {
+    content: "Remove";
+    max-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    color: #fff;
+    font: 600 0.72rem/1 Inter, system-ui, sans-serif;
+    letter-spacing: 0.02em;
+    transition: max-width 0.22s ease, margin 0.22s ease;
+}
+
+#app [class*="meta-item-container"] [class*="dismiss-icon-layer"]:hover,
+#app [class*="meta-item-container"] [class*="dismiss-icon-layer"]:focus-visible {
+    background: var(--dx-accent);
+    box-shadow: 0 4px 16px color-mix(in srgb, var(--dx-accent) 45%, transparent);
+}
+
+#app [class*="meta-item-container"] [class*="dismiss-icon-layer"]:hover::before,
+#app [class*="meta-item-container"] [class*="dismiss-icon-layer"]:focus-visible::before {
+    max-width: 4.5rem;
+    margin-right: 0.4rem;
+}
+
+/* the "+N" badge steps aside while the remove tab is showing */
+#app [class*="meta-item-container"] [class*="new-videos"] {
+    transition: opacity 0.18s ease;
+}
+
+#app [class*="continue-watching-row"] [class*="meta-item-container"].hovered [class*="new-videos"] {
+    opacity: 0;
+}
+
+/* Card menu dots */
+#app [class*="meta-item-container"] [class*="menu-label-container"] {
+    border-radius: var(--dx-radius-s);
+}
+
+/* Placeholders while loading */
+#app [class*="meta-row-placeholder-container"] [class*="poster-container"],
+#app [class*="meta-item-placeholder"] [class*="poster-container"],
+#app [class*="placeholder"] [class*="poster-container"] {
+    border-radius: var(--dx-radius) !important;
+    /* static on purpose: rows from broken addons stay placeholders forever, and an endless
+       animation on dozens of them would cost CPU the whole time Home is open */
+    background: var(--dx-surface) !important;
+    animation: none !important;
+}
+
+#app [class*="meta-row-placeholder-container"] [class*="title-bar-container"],
+#app [class*="meta-row-placeholder-container"] [class*="title-label"] {
+    display: none;
+}
+
+#app [class*="meta-row-placeholder-container"] [class*="header-container"] [class*="title-container"] {
+    width: 14rem;
+    height: 1.1rem;
+    border-radius: var(--dx-radius-s);
+    background: var(--dx-surface);
+    color: transparent !important;
+}
+
+
+/* =====================================================================
+   6. BILLBOARD (built by the plugin)
+   ===================================================================== */
+
+.dx-hero {
+    position: relative;
+    width: 100%;
+    height: min(82vh, 56.25vw);
+    min-height: 26rem;
+    margin-bottom: -6vw;
+    overflow: hidden;
+    background: var(--dx-bg);
+    isolation: isolate;
+    animation: dx-fade 0.8s var(--dx-ease) both;
+}
+
+.dx-hero-slide {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.dx-hero-slide.is-active {
+    pointer-events: auto;
+}
+
+/* Only the pictures cross-fade; the text is handled separately so it never looks washed out */
+.dx-hero-backdrop {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    background-size: cover;
+    background-position: center 20%;
+    transform: scale(1.06);
+    transform-origin: 70% 40%;
+    transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform, opacity;
+}
+
+.dx-hero-slide.is-active .dx-hero-backdrop {
+    opacity: 1;
+}
+
+/* The slow zoom keeps running on the outgoing picture until it has faded (class managed by the plugin) */
+.dx-hero-backdrop.kb {
+    animation: dx-kenburns 16s linear both;
+}
+
+@keyframes dx-kenburns {
+    from { transform: scale(1.06) translate3d(0, 0, 0); }
+    to { transform: scale(1.14) translate3d(-1.2%, -1%, 0); }
+}
+
+.dx-hero-shade {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background:
+        linear-gradient(90deg, rgba(11, 11, 13, 0.92) 0%, rgba(11, 11, 13, 0.6) 28%, rgba(11, 11, 13, 0.08) 58%, transparent 75%),
+        linear-gradient(0deg, var(--dx-bg) 0%, rgba(11, 11, 13, 0.75) 14%, rgba(11, 11, 13, 0) 42%),
+        linear-gradient(180deg, rgba(0, 0, 0, 0.45) 0%, transparent 18%);
+}
+
+.dx-hero-content {
+    position: absolute;
+    z-index: 2;
+    left: var(--dx-gutter);
+    bottom: calc(6vw + 4.5rem);
+    width: min(36rem, 42vw);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+/* Old text fades out first, then the new text fades in — never both at once, never moving,
+   so it stays crisp the whole time */
+.dx-hero-slide .dx-hero-content {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+}
+
+.dx-hero-slide.is-active .dx-hero-content {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.6s ease 0.45s, visibility 0s linear 0.45s;
+}
+
+/* First appearance on load: no waiting */
+.dx-hero.is-first .dx-hero-slide.is-active .dx-hero-content {
+    transition-delay: 0s;
+}
+
+.dx-hero-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--dx-text-2);
+}
+
+.dx-hero-kicker b {
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 1.25rem;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    color: var(--dx-accent);
+}
+
+.dx-hero-logo {
+    display: block;
+    max-width: min(30rem, 100%);
+    max-height: 11rem;
+    object-fit: contain;
+    object-position: left bottom;
+    filter: drop-shadow(0 6px 24px rgba(0, 0, 0, 0.55));
+}
+
+.dx-hero-title {
+    font-size: clamp(2.2rem, 4vw, 4rem);
+    font-weight: 800;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    color: #fff;
+    text-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+}
+
+.dx-hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem 0.85rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--dx-text-2);
+}
+
+.dx-hero-desc {
+    font-size: clamp(0.95rem, 1.05vw, 1.15rem);
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.88);
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.55);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.dx-hero-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 0.35rem;
+}
+
+.dx-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    height: 2.9rem;
+    padding: 0 1.6rem 0 1.3rem;
+    border-radius: var(--dx-radius);
+    font-size: 1.02rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.2s, transform 0.2s var(--dx-ease-out), box-shadow 0.2s;
+}
+
+.dx-btn:active {
+    transform: scale(0.97);
+}
+
+.dx-btn svg {
+    width: 1.35rem;
+    height: 1.35rem;
+    flex: none;
+}
+
+.dx-btn-primary {
+    background: #fff;
+    color: #000;
+}
+
+.dx-btn-primary svg {
+    fill: #000;
+}
+
+.dx-btn-primary:hover {
+    background: rgba(255, 255, 255, 0.82);
+}
+
+.dx-btn-secondary {
+    background: rgba(109, 109, 118, 0.55);
+    color: #fff;
+    backdrop-filter: blur(8px);
+}
+
+.dx-btn-secondary svg {
+    fill: none;
+    stroke: #fff;
+}
+
+.dx-btn-secondary:hover {
+    background: rgba(109, 109, 118, 0.38);
+}
+
+/* Keyboard: the selected button comes forward in white, like a TV menu (dimming it the way the
+   mouse hover does read as "off" when nothing points at it) */
+.dx-btn:focus-visible {
+    background: #fff;
+    color: #000;
+    transform: scale(1.06);
+    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.45);
+}
+
+.dx-btn:focus-visible svg {
+    fill: #000;
+}
+
+.dx-btn-secondary:focus-visible svg {
+    fill: none;
+    stroke: #000;
+}
+
+.dx-hero-dots {
+    position: absolute;
+    z-index: 3;
+    right: var(--dx-gutter);
+    bottom: calc(6vw + 4.75rem);
+    display: flex;
+    gap: 0.4rem;
+}
+
+.dx-hero-dot {
+    position: relative;
+    width: 1.6rem;
+    height: 3px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.25);
+    cursor: pointer;
+    overflow: hidden;
+    transition: width 0.4s var(--dx-ease-out), background-color 0.2s;
+}
+
+.dx-hero-dot:hover,
+.dx-hero-dot:focus-visible {
+    background: rgba(255, 255, 255, 0.45);
+}
+
+.dx-hero-dot.is-active {
+    width: 3.2rem;
+}
+
+.dx-hero-dot.is-active::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: #fff;
+    transform-origin: left;
+    animation: dx-progress var(--dx-hero-interval, 9s) linear both;
+}
+
+.dx-hero.is-static .dx-hero-dot.is-active::after {
+    animation: none;
+}
+
+@keyframes dx-progress {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+}
+
+/* Rows that follow the billboard sit above its fade */
+#app [class*="board-content-"]:not([class*="board-content-container"]) > .dx-hero ~ * {
+    position: relative;
+    z-index: 2;
+}
+
+/* Shared rating / meta pills */
+.dx-imdb {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.dx-imdb i {
+    font-style: normal;
+    font-size: 0.68em;
+    font-weight: 900;
+    letter-spacing: -0.01em;
+    line-height: 1;
+    padding: 0.18em 0.32em;
+    border-radius: 3px;
+    background: #f5c518;
+    color: #000;
+}
+
+.dx-match {
+    font-weight: 700;
+    color: #46d369;
+}
+
+.dx-pill {
+    display: inline-flex;
+    align-items: center;
+    height: 1.35rem;
+    padding: 0 0.45rem;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 3px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--dx-text-2);
+}
+
+.dx-sep {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--dx-text-3);
+}
+
+/* =====================================================================
+   7. CAROUSEL ARROWS + PREVIEW CARD + RATING BADGES (plugin parts)
+   ===================================================================== */
+
+.dx-arrow {
+    position: absolute;
+    z-index: 4;
+    bottom: 0.75rem;
+    width: calc(var(--dx-gutter) - 0.35rem);
+    min-width: 2.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.25s, background-color 0.25s;
+}
+
+.dx-arrow svg {
+    width: 2rem;
+    height: 2rem;
+    transform: scale(var(--dx-arrow-scale, 1));
+    transition: transform 0.25s var(--dx-ease-out);
+}
+
+.dx-arrow-prev {
+    left: 0;
+    background: linear-gradient(90deg, rgba(11, 11, 13, 0.92), rgba(11, 11, 13, 0.4));
+}
+
+.dx-arrow-next {
+    right: 0;
+    background: linear-gradient(270deg, rgba(11, 11, 13, 0.92), rgba(11, 11, 13, 0.4));
+}
+
+[class*="meta-row"]:hover > .dx-arrow:not(.is-hidden) {
+    opacity: 1;
+}
+
+.dx-arrow:hover,
+.dx-arrow:focus-visible {
+    --dx-arrow-scale: 1.25;
+}
+
+.dx-arrow.is-hidden {
+    pointer-events: none;
+}
+
+/* Row page indicator */
+.dx-row-pages {
+    position: absolute;
+    top: 0.95rem;
+    right: var(--dx-gutter);
+    display: flex;
+    gap: 3px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+[class*="meta-row"]:hover > .dx-row-pages,
+[class*="meta-row"]:focus-visible > .dx-row-pages {
+    opacity: 1;
+}
+
+.dx-row-pages span {
+    width: 0.8rem;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.dx-row-pages span.is-active {
+    background: rgba(255, 255, 255, 0.85);
+}
+
+/* Header pushes "See all" left of the page dots */
+#app [class*="meta-row"]:has(> .dx-row-pages) > [class*="header-container"] {
+    padding-right: calc(var(--dx-gutter) + 6rem) !important;
+}
+
+/* IMDb badge on posters */
+.dx-badge {
+    position: absolute;
+    z-index: 4;
+    top: 0.45rem;
+    left: 0.45rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    height: 1.35rem;
+    padding: 0 0.4rem 0 0.25rem;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(6px);
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #fff;
+    pointer-events: none;
+    animation: dx-fade 0.4s both;
+}
+
+.dx-badge i {
+    font-style: normal;
+    font-size: 0.6rem;
+    font-weight: 900;
+    padding: 0.12rem 0.22rem;
+    border-radius: 2px;
+    background: #f5c518;
+    color: #000;
+    line-height: 1;
+}
+
+/* Anime scores (Kitsu / AniList) get their own colour so they never read as IMDb */
+.dx-badge.is-anime i {
+    background: #3db4f2;
+    color: #fff;
+}
+
+/* Continue Watching as wide cards */
+.dx-wide-art {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background-size: cover;
+    background-position: center;
+    pointer-events: none;
+}
+
+.dx-wide-art::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.1) 45%, transparent 70%);
+}
+
+.dx-wide-logo {
+    position: absolute;
+    z-index: 2;
+    left: 0.85rem;
+    bottom: 1.15rem;
+    max-width: 55%;
+    max-height: 32%;
+    object-fit: contain;
+    object-position: left bottom;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.7));
+}
+
+.dx-wide-name {
+    position: absolute;
+    z-index: 2;
+    left: 0.85rem;
+    right: 0.85rem;
+    bottom: 1.1rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#app [class*="continue-watching-row"][data-dx-wide-row] [class*="poster-container"] {
+    padding-top: 56.25% !important;
+}
+
+#app [class*="continue-watching-row"][data-dx-wide-row] [class*="poster-image-layer"] {
+    opacity: 0;
+}
+
+#app [class*="continue-watching-row"][data-dx-wide-row] [class*="progress-bar-layer"],
+#app [class*="continue-watching-row"][data-dx-wide-row] [class*="play-icon-layer"],
+#app [class*="continue-watching-row"][data-dx-wide-row] [class*="new-videos"],
+#app [class*="continue-watching-row"][data-dx-wide-row] [class*="watched-icon-layer"] {
+    z-index: 3;
+}
+
+/* Hover preview — unfolds out of the card like Netflix's mini-modal. The outer box carries the
+   shadow (it follows the clipped shape), the inner layer is revealed from the card's outline. */
+.dx-preview {
+    position: fixed;
+    z-index: 900;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    will-change: transform, opacity;
+    transition:
+        transform 0.2s ease,
+        opacity 0.2s ease,
+        visibility 0s linear 0.2s;
+}
+
+.dx-preview.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition: opacity 0.1s ease, visibility 0s;
+}
+
+.dx-preview.is-closing {
+    visibility: visible;
+    opacity: 0;
+    transform: scale(0.97) !important;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.dx-preview-inner {
+    position: relative;
+    min-height: inherit;
+    display: flex;
+    flex-direction: column;
+    border-radius: 8px;
+    background: #181818;
+    overflow: hidden;
+    transition: clip-path 0.48s cubic-bezier(0.2, 0.85, 0.25, 1);
+    will-change: clip-path;
+}
+
+/* fine hairline so the panel's edge reads crisp against the page */
+.dx-preview-inner::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 6;
+    border-radius: inherit;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    pointer-events: none;
+}
+
+/* Aura: the title's own colours glowing softly around the panel once it has opened,
+   with a deep shadow underneath for lift */
+.dx-preview-aura {
+    position: absolute;
+    z-index: -1;
+    inset: -14px -18px -22px;
+    border-radius: 22px;
+    background: #181818 center / cover no-repeat;
+    filter: blur(30px) saturate(1.5) brightness(0.9);
+    opacity: 0;
+    transform: scale(0.92);
+    transition: opacity 0.55s ease 0.16s, transform 0.6s cubic-bezier(0.2, 0.85, 0.25, 1) 0.1s;
+    pointer-events: none;
+    will-change: opacity, transform;
+}
+
+.dx-preview::before {
+    content: "";
+    position: absolute;
+    z-index: -2;
+    inset: 10% 6% -4%;
+    border-radius: 18px;
+    background: rgba(0, 0, 0, 0.85);
+    filter: blur(28px);
+    opacity: 0;
+    transition: opacity 0.4s ease 0.12s;
+    pointer-events: none;
+}
+
+.dx-preview.is-open .dx-preview-aura {
+    opacity: 0.55;
+    transform: none;
+}
+
+.dx-preview.is-open::before {
+    opacity: 1;
+}
+
+.dx-preview.is-closing .dx-preview-aura,
+.dx-preview.is-closing::before {
+    transition-delay: 0s;
+}
+
+/* the card's own artwork, fading into the panel as it unfolds */
+.dx-preview-ghost {
+    position: absolute;
+    z-index: 5;
+    /* the same corners as the poster it grows out of */
+    border-radius: var(--dx-radius);
+    background: #222 center / cover no-repeat;
+    pointer-events: none;
+    opacity: 1;
+    /* fades only once the panel's artwork is showing around it: no see-through moment */
+    transition: opacity 0.3s ease 0.16s;
+    will-change: opacity;
+}
+
+.dx-preview.is-open .dx-preview-ghost {
+    opacity: 0;
+}
+
+/* details settle in just after the panel has opened */
+.dx-preview .dx-preview-body {
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.3s ease 0.16s, transform 0.4s cubic-bezier(0.2, 0.85, 0.25, 1) 0.14s;
+}
+
+.dx-preview.is-open .dx-preview-body {
+    opacity: 1;
+    transform: none;
+}
+
+.dx-preview-media {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: #2a2a2a center / cover no-repeat;
+    cursor: pointer;
+}
+
+/* its own rounded top as well: the zooming artwork and the trailer are layers of their own, and
+   the panel's rounded clip alone can let their corners show square while the card unfolds */
+.dx-preview-media {
+    overflow: hidden;
+    border-radius: var(--dx-radius) var(--dx-radius) 0 0;
+}
+
+.dx-preview-media::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: inherit;
+    transform-origin: 60% 40%;
+}
+
+.dx-preview.is-open .dx-preview-media::before {
+    animation: dx-preview-zoom 6s ease-out both;
+}
+
+@keyframes dx-preview-zoom {
+    from { transform: scale(1); }
+    to { transform: scale(1.08); }
+}
+
+.dx-preview-media::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(0deg, #181818 0%, rgba(24, 24, 24, 0.35) 22%, transparent 45%);
+}
+
+.dx-preview-media img {
+    position: absolute;
+    z-index: 1;
+    left: 0.9rem;
+    bottom: 0.7rem;
+    max-width: 58%;
+    max-height: 40%;
+    object-fit: contain;
+    object-position: left bottom;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.8));
+}
+
+.dx-preview-name {
+    position: absolute;
+    z-index: 1;
+    left: 0.9rem;
+    right: 0.9rem;
+    bottom: 0.7rem;
+    font-size: 1.2rem;
+    font-weight: 800;
+    line-height: 1.15;
+    color: #fff;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85);
+}
+
+.dx-preview-media.has-logo .dx-preview-name {
+    display: none;
+}
+
+
+.dx-preview-body {
+    flex: 1;
+    padding: 0.85rem 1rem 1.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.dx-preview-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dx-round {
+    position: relative;
+    width: 2.5rem;
+    height: 2.5rem;
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    background: rgba(42, 42, 42, 0.6);
+    color: #fff;
+    cursor: pointer;
+    transition: border-color 0.15s, background-color 0.15s;
+}
+
+.dx-round:hover,
+.dx-round:focus-visible {
+    border-color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.dx-round svg {
+    width: 1.2rem;
+    height: 1.2rem;
+}
+
+.dx-round.is-primary {
+    background: #fff;
+    border-color: #fff;
+    color: #000;
+}
+
+.dx-round.is-primary:hover,
+.dx-round.is-primary:focus-visible {
+    background: rgba(255, 255, 255, 0.8);
+}
+
+.dx-round.is-primary svg {
+    margin-left: 2px;
+}
+
+.dx-round.is-end {
+    margin-left: auto;
+}
+
+/* Remove from Continue Watching: quieter than the others until pointed at */
+.dx-round.dx-remove {
+    border-color: rgba(255, 255, 255, 0.28);
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.dx-round.dx-remove:hover,
+.dx-round.dx-remove:focus-visible {
+    border-color: var(--dx-accent);
+    background: color-mix(in srgb, var(--dx-accent) 22%, transparent);
+    color: #fff;
+}
+
+.dx-round.dx-remove + .dx-round {
+    margin-left: 0.5rem;
+}
+
+/* the last button's tooltip opens leftwards so the card's edge never cuts it off */
+.dx-preview-actions .dx-round:last-child[data-tip]::after {
+    left: auto;
+    right: 0;
+    transform: translate(0, 4px);
+}
+
+.dx-preview-actions .dx-round:last-child[data-tip]:hover::after,
+.dx-preview-actions .dx-round:last-child[data-tip]:focus-visible::after {
+    transform: none;
+}
+
+.dx-round.is-pop {
+    animation: dx-pop-btn 0.35s var(--dx-ease-out);
+}
+
+@keyframes dx-pop-btn {
+    40% { transform: scale(1.2); }
+}
+
+/* Small tooltip above the round buttons */
+.dx-round[data-tip]::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 0.6rem);
+    left: 50%;
+    transform: translate(-50%, 4px);
+    padding: 0.35rem 0.6rem;
+    border-radius: 4px;
+    background: #e6e6e6;
+    color: #111;
+    font-size: 0.78rem;
+    font-weight: 700;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s, transform 0.15s;
+}
+
+.dx-round[data-tip]:hover::after,
+.dx-round[data-tip]:focus-visible::after {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
+.dx-round.is-end[data-tip]::after {
+    left: auto;
+    right: 0;
+    transform: translate(0, 4px);
+}
+
+.dx-round.is-end[data-tip]:hover::after,
+.dx-round.is-end[data-tip]:focus-visible::after {
+    transform: none;
+}
+
+.dx-preview-facts {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.3rem 0.55rem;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: #bcbcbc;
+}
+
+.dx-preview-facts .dx-match {
+    color: #46d369;
+    font-weight: 700;
+}
+
+.dx-hd {
+    padding: 0 0.3rem;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 3px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.dx-preview-genres {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.45rem;
+    font-size: 0.88rem;
+    color: #fff;
+}
+
+.dx-preview-genres span + span::before {
+    content: "•";
+    margin-right: 0.45rem;
+    color: #646464;
+}
+
+/* ---------- Intro (pre-rendered film, see plugin) ---------- */
+.dx-splash {
+    position: fixed;
+    inset: 0;
+    z-index: 100000;
+    background: #000;
+    cursor: pointer;
+    transition: opacity 0.6s ease, visibility 0.6s;
+}
+
+.dx-splash.is-done {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.dx-splash-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: #000;
+}
+
+/* Fallback when video can't play: opacity/transform only, so it stays on the compositor */
+.dx-splash-mark {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    font-family: "Bebas Neue", "Inter", sans-serif;
+    font-size: clamp(5rem, 16vw, 18rem);
+    line-height: 1;
+    color: var(--dx-accent);
+    transform: translate(-50%, -50%);
+    animation: dx-intro-fallback 1.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    will-change: transform, opacity;
+}
+
+@keyframes dx-intro-fallback {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.92); }
+    30% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    75% { opacity: 1; transform: translate(-50%, -50%) scale(1.04); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1.2); }
+}
+
+/* =====================================================================
+   8. DETAIL PAGE
+   ===================================================================== */
+
+#app [class*="metadetails-container"] > [class*="background-image-layer"] {
+    opacity: 1;
+}
+
+#app [class*="metadetails-container"] > [class*="background-image-layer"] img {
+    opacity: 1 !important;
+    filter: none !important;
+    object-fit: cover;
+    object-position: center 20%;
+    animation: dx-fade 0.9s var(--dx-ease) both;
+}
+
+#app [class*="metadetails-container"] > [class*="background-image-layer"]::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(90deg, rgba(11, 11, 13, 0.94) 0%, rgba(11, 11, 13, 0.7) 32%, rgba(11, 11, 13, 0.12) 60%, rgba(11, 11, 13, 0.35) 100%),
+        linear-gradient(0deg, rgba(11, 11, 13, 0.9) 0%, transparent 38%),
+        linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, transparent 18%);
+}
+
+#app [class*="metadetails-container"] > nav[class*="horizontal-nav-bar"] {
+    height: var(--dx-nav-h);
+    padding: 0 var(--dx-gutter) 0 calc(var(--dx-gutter) - 0.6rem);
+    background: transparent;
+}
+
+#app [class*="metadetails-container"] > nav [class*="back-button-container"],
+#app [class*="player-container"] nav [class*="back-button-container"] {
+    height: 2.5rem;
+    width: 2.5rem;
+    margin: 0;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(8px);
+    transition: background-color 0.2s, transform 0.2s;
+}
+
+#app [class*="metadetails-container"] > nav [class*="back-button-container"]:hover,
+#app [class*="player-container"] nav [class*="back-button-container"]:hover,
+#app [class*="metadetails-container"] > nav [class*="back-button-container"]:focus-visible,
+#app [class*="player-container"] nav [class*="back-button-container"]:focus-visible {
+    background: rgba(255, 255, 255, 0.16);
+    transform: translateX(-2px);
+}
+
+#app [class*="metadetails-content"] {
+    padding-left: var(--dx-gutter);
+}
+
+#app [class*="metadetails-content"] > [class*="meta-preview-container"] {
+    padding-top: 1rem;
+    padding-bottom: 8vh;
+    justify-content: flex-end;
+}
+
+#app [class*="metadetails-content"] > [class*="meta-preview-container"] > [class*="meta-info-container"] {
+    flex: 0 1 auto;
+}
+
+#app [class*="metadetails-content"] > [class*="meta-preview-container"] > [class*="action-buttons-container"] {
+    margin-top: 1.75rem;
+}
+
+/* Meta preview (detail + discover side panel) */
+#app [class*="meta-preview-container"] [class*="meta-info-container"] {
+    padding-right: 1rem;
+}
+
+#app [class*="meta-preview-container"] [class*="logo"] {
+    filter: drop-shadow(0 6px 24px rgba(0, 0, 0, 0.6));
+    animation: dx-rise 0.6s var(--dx-ease-out) both;
+}
+
+#app [class*="meta-preview-container"] [class*="logo-placeholder"] {
+    font-size: clamp(2rem, 3.4vw, 3.4rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+}
+
+#app [class*="meta-preview-container"] [class*="runtime-release-info-container"] {
+    gap: 1.1rem;
+    flex-wrap: wrap;
+}
+
+#app [class*="meta-preview-container"] [class*="runtime-label"],
+#app [class*="meta-preview-container"] [class*="release-info-label"] {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--dx-text-2);
+    margin: 0;
+}
+
+#app [class*="meta-preview-container"] [class*="imdb-button-container"] {
+    height: 1.9rem;
+    padding: 0 0.6rem;
+    gap: 0.45rem;
+    border-radius: var(--dx-radius-s);
+    background: rgba(245, 197, 24, 0.12);
+    border: 1px solid rgba(245, 197, 24, 0.35);
+    transition: background-color 0.2s;
+}
+
+#app [class*="meta-preview-container"] [class*="imdb-button-container"]:hover,
+#app [class*="meta-preview-container"] [class*="imdb-button-container"]:focus-visible {
+    background: rgba(245, 197, 24, 0.22);
+}
+
+#app [class*="meta-preview-container"] [class*="imdb-button-container"] [class*="label"] {
+    font-weight: 800;
+    color: #fff;
+}
+
+#app [class*="meta-preview-container"] [class*="imdb-button-container"] svg {
+    color: #f5c518;
+}
+
+#app [class*="meta-preview-container"] [class*="meta-links-container"] [class*="label-container"] {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dx-text-3);
+    opacity: 1;
+}
+
+#app [class*="meta-preview-container"] [class*="link-container"] {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    height: 2rem;
+    /* optical centring: the font reserves descender space below, so nudge capitals down */
+    padding: 0.15em 0.85rem 0 !important;
+    line-height: 1 !important;
+    vertical-align: middle;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid var(--dx-line);
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--dx-text);
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+#app [class*="meta-preview-container"] [class*="link-container"]:hover,
+#app [class*="meta-preview-container"] [class*="link-container"]:focus-visible {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: var(--dx-line-strong);
+}
+
+#app [class*="meta-preview-container"] [class*="description-container"] {
+    font-size: 1.02rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.86);
+    max-width: 48rem;
+}
+
+#app [class*="meta-preview-container"] [class*="description-container"] [class*="label-container"] {
+    display: none;
+}
+
+/* Action buttons: first (Play/Trailer) is a solid button, the rest are round */
+#app [class*="meta-preview-container"] [class*="action-buttons-container"] {
+    gap: 0.6rem;
+    align-items: center;
+}
+
+#app [class*="meta-preview-container"] [class*="action-button-container"],
+#app [class*="meta-preview-container"] [class*="group-container"] {
+    height: 3rem;
+    min-width: 3rem;
+    border-radius: 999px;
+    background: rgba(42, 42, 48, 0.65);
+    border: 1.5px solid rgba(255, 255, 255, 0.28);
+    backdrop-filter: blur(10px);
+    transition: background-color 0.2s, border-color 0.2s, transform 0.2s var(--dx-ease-out);
+}
+
+#app [class*="meta-preview-container"] [class*="action-button-container"]:hover,
+#app [class*="meta-preview-container"] [class*="action-button-container"]:focus-visible {
+    border-color: #fff;
+    background: rgba(255, 255, 255, 0.12);
+    transform: translateY(-1px);
+}
+
+#app [class*="meta-preview-container"] [class*="group-container"] [class*="icon-container"] {
+    border-radius: 999px;
+    transition: background-color 0.2s;
+}
+
+#app [class*="meta-preview-container"] [class*="group-container"] [class*="icon-container"]:hover,
+#app [class*="meta-preview-container"] [class*="group-container"] [class*="icon-container"]:focus-visible {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+#app [class*="meta-preview-container"] [class*="action-button-container"][class*="wide"] {
+    padding: 0 1.5rem 0 1.15rem;
+    border-radius: var(--dx-radius);
+    background: #fff;
+    border-color: #fff;
+    color: #000;
+}
+
+#app [class*="meta-preview-container"] [class*="action-button-container"][class*="wide"] * {
+    color: #000 !important;
+}
+
+#app [class*="meta-preview-container"] [class*="action-button-container"][class*="wide"] [class*="label"] {
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+#app [class*="meta-preview-container"] [class*="action-button-container"][class*="wide"]:hover,
+#app [class*="meta-preview-container"] [class*="action-button-container"][class*="wide"]:focus-visible {
+    background: rgba(255, 255, 255, 0.84);
+}
+
+/* Episodes / streams panel */
+#app [class*="metadetails-content"] [class*="videos-list-container"],
+#app [class*="metadetails-content"] [class*="streams-list-container"] {
+    flex: 0 0 clamp(28rem, 31vw, 42rem) !important;
+    width: clamp(28rem, 31vw, 42rem);
+    margin: 0.75rem var(--dx-gutter) 1.5rem 0;
+    border-radius: var(--dx-radius-l);
+    background: rgba(19, 19, 23, 0.82);
+    border: 1px solid var(--dx-line);
+    backdrop-filter: blur(24px) saturate(140%);
+    box-shadow: var(--dx-shadow-2);
+    animation: dx-slide-in 0.5s var(--dx-ease-out) both;
+}
+
+@keyframes dx-slide-in {
+    from { opacity: 0; transform: translateX(24px); }
+    to { opacity: 1; transform: none; }
+}
+
+#app [class*="seasons-bar-container"] {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--dx-line);
+}
+
+#app [class*="seasons-bar-container"] [class*="button-container"] {
+    border-radius: var(--dx-radius);
+}
+
+#app [class*="seasons-bar-container"] [class*="button-container"]:hover,
+#app [class*="seasons-bar-container"] [class*="button-container"]:focus-visible {
+    background: rgba(255, 255, 255, 0.07);
+}
+
+#app [class*="seasons-popup-label-container"] [class*="button-container"] {
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid var(--dx-line);
+    font-weight: 700;
+}
+
+#app [class*="videos-list-container"] [class*="search-bar-container"] {
+    margin: 0.75rem;
+    border-radius: var(--dx-radius);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--dx-line);
+}
+
+#app [class*="video-container"] {
+    margin: 0 0.5rem;
+    border-radius: var(--dx-radius);
+    transition: background-color 0.2s;
+}
+
+#app [class*="video-container"]:hover,
+#app [class*="video-container"]:focus-visible {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+#app [class*="video-container"][class*="selected"] {
+    background: rgba(255, 255, 255, 0.09);
+    box-shadow: inset 3px 0 0 var(--dx-accent);
+}
+
+#app [class*="video-container"] [class*="thumbnail-container"] {
+    border-radius: var(--dx-radius-s);
+    overflow: hidden;
+}
+
+#app [class*="video-container"] [class*="title-container"] {
+    font-weight: 600;
+    color: var(--dx-text);
+}
+
+#app [class*="video-container"] [class*="released-container"] {
+    color: var(--dx-text-3);
+}
+
+#app [class*="video-container"] [class*="upcoming-watched-container"] > * {
+    border-radius: var(--dx-radius-s);
+}
+
+#app [class*="video-container"] [class*="watched-container"] {
+    background: rgba(70, 211, 105, 0.15);
+    color: #46d369;
+}
+
+#app [class*="streams-list-container"] [class*="select-choices-wrapper"] {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--dx-line);
+}
+
+#app [class*="streams-list-container"] [class*="stream-container"] {
+    margin: 0.2rem 0.5rem;
+    border-radius: var(--dx-radius);
+    transition: background-color 0.2s, transform 0.2s var(--dx-ease-out);
+}
+
+#app [class*="streams-list-container"] [class*="stream-container"]:hover,
+#app [class*="streams-list-container"] [class*="stream-container"]:focus-visible {
+    background: rgba(255, 255, 255, 0.07);
+    transform: translateX(3px);
+}
+
+/* A stream's right-click menu lives inside its card: lift that card above the ones after it,
+   otherwise they paint over the menu */
+#app [class*="streams-list-container"] [class*="stream-container"]:has([class*="menu-container"]) {
+    position: relative;
+    z-index: 40;
+    transform: none;
+}
+
+#app [class*="streams-list-container"] [class*="stream-container"] [class*="menu-container"] {
+    z-index: 41;
+}
+
+#app [class*="streams-list-container"] [class*="streams-container"] > [class*="stream-container"] {
+    align-self: stretch;
+    width: auto !important;
+    padding: 0.8rem 1rem;
+}
+
+#app [class*="streams-list-container"] [class*="stream-container"] [class*="info-container"] {
+    width: 8.5rem;
+}
+
+#app [class*="streams-list-container"] [class*="stream-container"] [class*="description-container"] {
+    max-width: none !important;
+    flex: 1 1 0 !important;
+    white-space: pre-wrap !important;
+    overflow-wrap: anywhere;
+    max-height: none !important;
+    font-size: 0.85rem;
+    line-height: 1.45;
+}
+
+#app [class*="streams-list-container"] [class*="addon-name"] {
+    font-weight: 700;
+    color: var(--dx-text);
+}
+
+#app [class*="streams-list-container"] [class*="description-container"] {
+    color: var(--dx-text-2);
+}
+
+/* =====================================================================
+   9. DISCOVER / LIBRARY / SEARCH / CALENDAR
+   ===================================================================== */
+
+#app [class*="discover-content"],
+#app [class*="library-content"],
+#app [class*="search-content"] {
+    padding-top: 0.75rem;
+}
+
+#app [class*="search-content"] {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+#app [class*="discover-content"] [class*="catalog-container"] {
+    padding-left: calc(var(--dx-gutter) - 0.35rem);
+}
+
+#app [class*="library-content"] {
+    padding-left: calc(var(--dx-gutter) - 0.35rem);
+    padding-right: calc(var(--dx-gutter) - 0.35rem);
+}
+
+#app [class*="selectable-inputs-container"] {
+    gap: 0.6rem;
+    padding: 0 0.35rem 0.75rem;
+}
+
+/* Dropdowns / filters / chips */
+#app [class*="multiselect-menu"] > [class*="button-container"],
+#app [class*="select-input"] > [class*="button-container"],
+#app [class*="filter-button"],
+#app [class*="selectable-inputs"] [class*="button-container"] {
+    height: 2.5rem;
+    border-radius: var(--dx-radius);
+    background: var(--dx-surface);
+    border: 1px solid var(--dx-line);
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+#app [class*="multiselect-menu"] > [class*="button-container"]:hover,
+#app [class*="filter-button"]:hover,
+#app [class*="multiselect-menu"] > [class*="button-container"]:focus-visible,
+#app [class*="filter-button"]:focus-visible {
+    background: var(--dx-surface-2);
+    border-color: var(--dx-line-strong);
+}
+
+#app [class*="multiselect-menu"] [class*="text"] {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+#app [class*="chips"] [class*="chip"] {
+    height: 2.2rem;
+    padding: 0 1rem;
+    border-radius: 999px;
+    background: var(--dx-surface);
+    border: 1px solid var(--dx-line);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--dx-text-2);
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+#app [class*="chips"] [class*="chip"]:hover,
+#app [class*="chips"] [class*="chip"]:focus-visible {
+    color: var(--dx-text);
+    border-color: var(--dx-line-strong);
+}
+
+#app [class*="chips"] [class*="chip"][class*="active"] {
+    background: #fff;
+    border-color: #fff;
+    color: #000;
+}
+
+/* Grids */
+#app [class*="discover-content"] [class*="meta-items-container"],
+#app [class*="library-content"] [class*="meta-items-container"] {
+    grid-template-columns: repeat(auto-fill, minmax(clamp(9.5rem, 11vw, 13rem), 1fr)) !important;
+    gap: 0.35rem 0;
+    padding-bottom: 3rem;
+}
+
+/* Discover side preview */
+#app [class*="discover-content"] > [class*="meta-preview-container"] {
+    margin: 0 var(--dx-gutter) 1.25rem 0.75rem;
+    border-radius: var(--dx-radius-l);
+    background: var(--dx-bg-raised);
+    border: 1px solid var(--dx-line);
+    overflow: hidden;
+    box-shadow: var(--dx-shadow-2);
+}
+
+#app [class*="discover-content"] > [class*="meta-preview-container"] [class*="background-image-layer"] img {
+    opacity: 0.55;
+    filter: none;
+}
+
+#app [class*="discover-content"] > [class*="meta-preview-container"] [class*="background-image-layer"]::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(0deg, var(--dx-bg-raised) 20%, rgba(19, 19, 23, 0.55) 60%, rgba(19, 19, 23, 0.3) 100%);
+}
+
+/* Empty / message states */
+#app [class*="message-container"],
+#app [class*="placeholder-label"] {
+    color: var(--dx-text-3);
+}
+
+/* Calendar */
+#app [class*="calendar"] [class*="selector"] {
+    gap: 1rem;
+}
+
+#app [class*="calendar"] [class*="selector"] [class*="button-container"] {
+    border-radius: var(--dx-radius);
+    background: var(--dx-surface);
+    border: 1px solid var(--dx-line);
+}
+
+#app [class*="calendar"] [class*="cell"] {
+    border-radius: var(--dx-radius);
+    background: var(--dx-bg-raised);
+    border: 1px solid var(--dx-line);
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+#app [class*="calendar"] [class*="cell"]:hover,
+#app [class*="calendar"] [class*="cell"]:focus-visible {
+    background: var(--dx-surface);
+    border-color: var(--dx-line-strong);
+}
+
+#app [class*="calendar"] [class*="cell"][class*="today"] {
+    border-color: var(--dx-accent);
+    box-shadow: inset 0 0 0 1px var(--dx-accent);
+}
+
+#app [class*="calendar"] [class*="cell"][class*="today"] [class*="day"] {
+    color: #fff;
+    font-weight: 800;
+}
+
+#app [class*="calendar"] [class*="list-"] [class*="item-"] {
+    border-radius: var(--dx-radius);
+}
+
+#app [class*="calendar"] [class*="episode-"] {
+    border-radius: var(--dx-radius);
+    transition: background-color 0.2s;
+}
+
+#app [class*="calendar"] [class*="episode-"]:hover,
+#app [class*="calendar"] [class*="episode-"]:focus-visible {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+#app [class*="calendar"] [class*="artwork-container"] {
+    border-radius: var(--dx-radius-s);
+    overflow: hidden;
+}
+
+/* =====================================================================
+   10. ADDONS + SETTINGS
+   ===================================================================== */
+
+#app [class*="addons-content"] {
+    padding: 0.75rem calc(var(--dx-gutter) - 0.35rem) 0;
+}
+
+#app [class*="addons-content"] [class*="add-button-container"] {
+    height: 2.5rem;
+    padding: 0 1.1rem;
+    border-radius: var(--dx-radius);
+    background: var(--dx-accent);
+    transition: background-color 0.2s;
+}
+
+#app [class*="addons-content"] [class*="add-button-container"]:hover,
+#app [class*="addons-content"] [class*="add-button-container"]:focus-visible {
+    background: var(--dx-accent-hover);
+}
+
+#app [class*="addons-content"] [class*="add-button-container"] * {
+    color: #fff !important;
+    font-weight: 700;
+}
+
+#app [class*="addons-content"] label[class*="search-bar-container"] {
+    height: 2.5rem;
+    border-radius: var(--dx-radius);
+    background: var(--dx-surface);
+    border: 1px solid var(--dx-line);
+}
+
+#app [class*="addons-list-container"] {
+    gap: 0.75rem;
+    padding-bottom: 2rem;
+}
+
+#app [class*="addons-list-container"] [class*="addon-container"] {
+    margin: 0 0 0.75rem 0;
+    padding: 1.1rem 1.25rem;
+    border-radius: var(--dx-radius-l);
+    background: var(--dx-bg-raised);
+    border: 1px solid var(--dx-line);
+    transition: background-color 0.25s, border-color 0.25s, transform 0.25s var(--dx-ease-out);
+}
+
+#app [class*="addons-list-container"] [class*="addon-container"]:hover,
+#app [class*="addons-list-container"] [class*="addon-container"]:focus-visible {
+    background: var(--dx-surface);
+    border-color: var(--dx-line-strong);
+}
+
+#app [class*="addon-container"] [class*="logo-container"] {
+    border-radius: var(--dx-radius);
+    background: var(--dx-surface-2);
+    overflow: hidden;
+}
+
+#app [class*="addon-container"] [class*="name-container"] {
+    font-weight: 700;
+}
+
+#app [class*="addon-container"] [class*="version-container"],
+#app [class*="addon-container"] [class*="types-container"] {
+    color: var(--dx-text-3);
+}
+
+#app [class*="addon-container"] [class*="description-container"] {
+    color: var(--dx-text-2);
+}
+
+/* Install / uninstall / configure / share */
+#app [class*="install-button-container"],
+#app [class*="configure-button-container"] {
+    border-radius: var(--dx-radius) !important;
+    background: var(--dx-accent) !important;
+    border: 0 !important;
+    transition: background-color 0.2s, opacity 0.2s;
+}
+
+#app [class*="install-button-container"]:hover,
+#app [class*="configure-button-container"]:hover,
+#app [class*="install-button-container"]:focus-visible,
+#app [class*="configure-button-container"]:focus-visible {
+    background: var(--dx-accent-hover) !important;
+}
+
+#app [class*="install-button-container"] *,
+#app [class*="configure-button-container"] * {
+    color: #fff !important;
+}
+
+#app [class*="uninstall-button-container"],
+#app [class*="share-button-container"] {
+    border-radius: var(--dx-radius) !important;
+    background: var(--dx-surface-2) !important;
+    border: 1px solid var(--dx-line) !important;
+    outline: none !important;
+}
+
+#app [class*="uninstall-button-container"]:hover,
+#app [class*="share-button-container"]:hover,
+#app [class*="uninstall-button-container"]:focus-visible,
+#app [class*="share-button-container"]:focus-visible {
+    background: var(--dx-surface-3) !important;
+}
+
+#app [class*="uninstall-button-container"] *,
+#app [class*="share-button-container"] * {
+    color: var(--dx-text) !important;
+}
+
+/* Settings */
+#app [class*="settings-content"] {
+    padding: 0.75rem var(--dx-gutter) 0;
+    gap: 2rem;
+}
+
+#app [class*="settings-content"] > [class*="menu-"] {
+    padding: 0.5rem;
+    border-radius: var(--dx-radius-l);
+    background: var(--dx-bg-raised);
+    border: 1px solid var(--dx-line);
+    height: fit-content;
+    max-height: 100%;
+}
+
+#app [class*="settings-content"] > [class*="menu-"] > [class*="button"],
+#app [class*="settings-content"] > [class*="menu-"] > div > [class*="button"] {
+    height: 2.75rem;
+    margin: 0.1rem 0;
+    padding: 0 1rem;
+    border-radius: var(--dx-radius);
+    font-weight: 600;
+    color: var(--dx-text-2);
+    opacity: 1;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+#app [class*="settings-content"] > [class*="menu-"] [class*="button"]:hover,
+#app [class*="settings-content"] > [class*="menu-"] [class*="button"]:focus-visible {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--dx-text);
+}
+
+#app [class*="settings-content"] > [class*="menu-"] [class*="button"][class*="selected"] {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    box-shadow: inset 3px 0 0 var(--dx-accent);
+}
+
+#app [class*="settings-content"] [class*="section-"] {
+    border-bottom: 1px solid var(--dx-line);
+}
+
+#app [class*="settings-content"] [class*="heading-"] {
+    font-weight: 700;
+}
+
+#app [class*="settings-content"] [class*="option-"] [class*="content-"] [class*="button-container"],
+#app [class*="settings-content"] [class*="multiselect-menu"] > [class*="button-container"] {
+    border-radius: var(--dx-radius);
+}
+
+#app [class*="settings-content"] [class*="user-info-content"] [class*="avatar"],
+#app [class*="settings-content"] [class*="user-info-content"] img {
+    border-radius: var(--dx-radius) !important;
+}
+
+/* Toggles and checkboxes */
+#app [class*="toggle-container"] [class*="toggle"] {
+    background: var(--dx-surface-3);
+}
+
+#app [class*="toggle-container"].checked [class*="toggle"],
+#app .checked > [class*="toggle"] {
+    background: var(--dx-accent) !important;
+}
+
+#app [class*="checkbox-container"].checked [class*="checkbox"],
+#app [class*="checkbox"].checked {
+    background: var(--dx-accent) !important;
+    border-color: var(--dx-accent) !important;
+}
+
+/* Keyboard: a selected switch or choice glows softly and grows a touch (they have no hover look
+   to borrow) */
+#app [class*="toggle-container"]:focus-visible,
+#app [class*="radio-container"]:focus-visible,
+#app [class*="checkbox-container"]:focus-visible {
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
+    transform: scale(1.08);
+    transition: transform 0.2s var(--dx-ease-out), filter 0.2s;
+}
+
+/* Text inputs */
+#app input[class*="text-input"],
+#app [class*="text-input"] input {
+    border-radius: var(--dx-radius);
+}
+
+/* =====================================================================
+   11. POPUPS, MENUS, MODALS, TOASTS, TOOLTIPS
+   ===================================================================== */
+
+#app [class*="menu-container"][class*="menu-direction"]:not([class*="context-menu"]),
+#app [class*="nav-menu-container"] {
+    border-radius: var(--dx-radius-l) !important;
+    background: rgba(22, 22, 27, 0.97) !important;
+    border: 1px solid var(--dx-line-strong) !important;
+    box-shadow: var(--dx-shadow-2) !important;
+    backdrop-filter: blur(20px);
+    overflow: hidden;
+}
+
+/* Animate the menu's content, never the container: other plugins hide containers with inline opacity */
+#app [class*="menu-container"][class*="menu-direction"] > * {
+    animation: dx-pop 0.18s var(--dx-ease-out) both;
+}
+
+@keyframes dx-pop {
+    from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+    to { opacity: 1; transform: none; }
+}
+
+#app [class*="nav-menu-container"] [class*="nav-menu-option-container"],
+#app [class*="menu-container"] [class*="option-container"] {
+    border-radius: var(--dx-radius);
+    transition: background-color 0.15s;
+}
+
+#app [class*="nav-menu-container"] [class*="nav-menu-option-container"]:hover,
+#app [class*="menu-container"] [class*="option-container"]:hover,
+#app [class*="nav-menu-container"] [class*="nav-menu-option-container"]:focus-visible,
+#app [class*="menu-container"] [class*="option-container"]:focus-visible {
+    background: rgba(255, 255, 255, 0.08) !important;
+}
+
+#app [class*="menu-container"] [class*="option-container"][class*="selected"] {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+#app [class*="nav-menu-container"] [class*="nav-menu-section"] {
+    border-color: var(--dx-line) !important;
+}
+
+#app [class*="modal-container"] {
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(6px);
+    animation: dx-fade 0.2s both;
+}
+
+#app [class*="modal-dialog-container"] {
+    border-radius: var(--dx-radius-l) !important;
+    background: var(--dx-surface) !important;
+    border: 1px solid var(--dx-line) !important;
+    box-shadow: var(--dx-shadow-2) !important;
+}
+
+/* The content sits inside the dialog: one card only, not a second inset one */
+#app [class*="modal-dialog-container"] [class*="modal-dialog-content"] {
+    border-radius: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+#app [class*="modal-dialog-container"] {
+    animation: dx-pop 0.25s var(--dx-ease-out) both;
+}
+
+#app [class*="modal-dialog-container"] [class*="action-button"],
+#app [class*="modal-dialog-container"] [class*="button-container"][class*="action"] {
+    border-radius: var(--dx-radius) !important;
+}
+
+#app [class*="toasts-container"] [class*="toast-item-container"] {
+    border-radius: var(--dx-radius) !important;
+    background: var(--dx-surface-2) !important;
+    border: 1px solid var(--dx-line) !important;
+    border-left: 3px solid var(--dx-accent) !important;
+    box-shadow: var(--dx-shadow-2) !important;
+    animation: dx-slide-in 0.35s var(--dx-ease-out) both;
+}
+
+#app [class*="toasts-container"] [class*="toast-item-container"][class*="success"] {
+    border-left-color: #46d369 !important;
+}
+
+#app [class*="toasts-container"] [class*="toast-item-container"][class*="error"] {
+    border-left-color: #ff5a5f !important;
+}
+
+#app [class*="tooltip-container"] {
+    border-radius: var(--dx-radius-s) !important;
+    background: #fff !important;
+    color: #000 !important;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+/* =====================================================================
+   12. PLAYER — Netflix-style controls and panels
+   ===================================================================== */
+
+/* Top bar: just a large back arrow (title moves to the bottom when the plugin is on) */
+#app [class*="player-container"] [class*="nav-bar-layer"] {
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.7) 0%, transparent 100%) !important;
+    height: 7rem;
+}
+
+#app [class*="player-container"] [class*="player-nav"] {
+    padding: 1.5rem var(--dx-gutter) 0 calc(var(--dx-gutter) - 0.75rem) !important;
+    align-items: center;
+}
+
+#app [class*="player-container"] [class*="player-nav"] [class*="player-button"] {
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: 50%;
+    background: transparent !important;
+    transition: transform 0.2s var(--dx-ease-out);
+}
+
+#app [class*="player-container"] [class*="player-nav"] [class*="player-button"]:hover,
+#app [class*="player-container"] [class*="player-nav"] [class*="player-button"]:focus-visible {
+    transform: scale(1.15);
+}
+
+/* Some Windows installs drew the back arrow unsized: a black chevron across the whole video that
+   sent every click back to the streams list. Keep top-bar icons small and click-through always. */
+#app [class*="player-container"] [class*="nav-bar-layer"] svg {
+    max-width: 3rem !important;
+    max-height: 3rem !important;
+    pointer-events: none !important;
+}
+
+#app [class*="player-container"] [class*="player-nav"] [class*="player-button"] svg {
+    width: 2.1rem;
+    height: 2.1rem;
+    color: #fff;
+}
+
+#app [class*="player-container"] [class*="player-title"] {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--dx-text-2);
+}
+
+body[data-dx-ptitle] #app [class*="player-container"] [class*="player-title-container"] {
+    visibility: hidden;
+}
+
+/* Bottom bar */
+#app [class*="player-container"] [class*="control-bar-layer"] {
+    padding: 5rem var(--dx-gutter) 1.4rem !important;
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.5) 45%, transparent 100%) !important;
+}
+
+#app [class*="player-container"] [class*="control-bar-layer"] [class*="seek-bar-container"] {
+    height: 2.25rem;
+    gap: 1rem;
+}
+
+#app [class*="player-container"] [class*="seek-bar-container"] [class*="label"] {
+    font-size: 0.95rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--dx-text);
+    opacity: 1;
+}
+
+#app [class*="player-container"] [class*="seek-bar-container"] > [class*="button-container"] {
+    background: transparent !important;
+    padding: 0 0.25rem;
+}
+
+#app [class*="slider-container"] [class*="track"] {
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.25) !important;
+}
+
+#app [class*="slider-container"] [class*="track-before"] {
+    background: rgba(255, 255, 255, 0.45) !important;
+}
+
+#app [class*="slider-container"] [class*="track-after"] {
+    background: var(--dx-accent) !important;
+}
+
+#app [class*="slider-container"] [class*="thumb"] {
+    background: var(--dx-accent) !important;
+    box-shadow: none !important;
+    transition: transform 0.15s var(--dx-ease-out);
+    transform-origin: center;
+}
+
+#app [class*="player-container"] [class*="seek-bar-container"] [class*="slider-container"] {
+    --track-size: calc(4px + 3px * var(--dx-seek-hot, 0));
+    --thumb-size: 16px;
+}
+
+#app [class*="player-container"] [class*="seek-bar-container"]:hover,
+#app [class*="player-container"] [class*="seek-bar-container"]:focus-visible {
+    --dx-seek-hot: 1;
+}
+
+/* Stremio centres the knob with translateX(-50%) — keep that, only add the scale */
+#app [class*="player-container"] [class*="seek-bar-container"] [class*="thumb"] {
+    transform: translateX(-50%) scale(calc(1.15 * var(--dx-seek-hot, 0)));
+}
+
+html[class*="active-slider-within"] #app [class*="player-container"] [class*="seek-bar-container"] [class*="thumb"] {
+    transform: translateX(-50%) scale(1.15);
+}
+
+/* Button row */
+#app [class*="player-container"] [class*="control-bar-buttons-container"] {
+    position: relative;
+    gap: 0.35rem;
+    margin-top: 0.35rem;
+    border-radius: 0 !important;
+    background: transparent !important;
+    transform: none !important;
+}
+
+#app [class*="player-container"] [class*="control-bar-buttons-container"] > * {
+    order: 3;
+}
+
+#app [class*="player-container"] [class*="control-bar-buttons-container"] > [class*="control-bar-button-"]:first-child {
+    order: 0;
+}
+
+#app [class*="player-container"] [class*="control-bar-buttons-container"] > .dx-seek-back {
+    order: 1;
+}
+
+#app [class*="player-container"] [class*="control-bar-buttons-container"] > .dx-seek-fwd {
+    order: 2;
+}
+
+#app [class*="player-container"] [class*="control-bar-buttons-menu-container"] {
+    gap: 0.35rem;
+    border-radius: 0 !important;
+    background: transparent !important;
+}
+
+#app [class*="player-container"] [class*="control-bar-button-"],
+#app [class*="player-container"] [class*="control-bar-buttons-menu-button"],
+#app [class*="player-container"] .dxp-player-btn,
+.dx-seek {
+    width: 3.5rem !important;
+    height: 3.5rem !important;
+    border-radius: 50% !important;
+    background: transparent !important;
+    transform: none !important;
+}
+
+#app [class*="player-container"] [class*="control-bar-button-"] svg,
+#app [class*="player-container"] [class*="control-bar-buttons-menu-button"] svg,
+#app [class*="player-container"] .dxp-player-btn svg,
+.dx-seek svg {
+    width: 2.15rem !important;
+    height: 2.15rem !important;
+    color: #fff;
+    opacity: 1 !important;
+    transform: scale(var(--dx-btn-scale, 1));
+    transition: transform 0.18s var(--dx-ease-out);
+}
+
+#app [class*="player-container"] [class*="control-bar-button-"]:hover:not(.disabled),
+#app [class*="player-container"] [class*="control-bar-buttons-menu-button"]:hover,
+.dx-seek:hover,
+#app [class*="player-container"] [class*="control-bar-button-"]:focus-visible,
+#app [class*="player-container"] [class*="control-bar-buttons-menu-button"]:focus-visible,
+#app [class*="player-container"] .dxp-player-btn:hover,
+#app [class*="player-container"] .dxp-player-btn:focus-visible,
+.dx-seek:focus-visible {
+    --dx-btn-scale: 1.22;
+}
+
+#app [class*="player-container"] [class*="control-bar-button-"].disabled svg {
+    opacity: 0.3 !important;
+}
+
+#app [class*="player-container"] [class*="control-bar-button-"].active svg,
+#app [class*="player-container"] [class*="control-bar-button-"][class*="active"] svg {
+    color: #fff;
+    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.5));
+}
+
+.dx-seek {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    cursor: pointer;
+}
+
+/* Volume: slider slides out when you point at the speaker */
+#app [class*="player-container"] [class*="control-bar-buttons-container"] > [class*="volume-slider"] {
+    flex: 0 0 0 !important;
+    width: 0;
+    margin: 0 !important;
+    opacity: 0;
+    --track-size: 4px;
+    --thumb-size: 14px;
+    transition: flex-basis 0.3s var(--dx-ease-out), opacity 0.2s, margin 0.3s;
+}
+
+#app [class*="player-container"] [class*="control-bar-button-"]:hover + [class*="volume-slider"],
+#app [class*="player-container"] [class*="control-bar-buttons-container"] > [class*="volume-slider"]:hover,
+html[class*="active-slider-within"] #app [class*="player-container"] [class*="control-bar-buttons-container"] > [class*="volume-slider"],
+#app [class*="player-container"] [class*="control-bar-button-"]:focus-visible + [class*="volume-slider"],
+#app [class*="player-container"] [class*="control-bar-buttons-container"] > [class*="volume-slider"]:focus-visible {
+    flex-basis: 8rem !important;
+    margin: 0 0.75rem 0 0.25rem !important;
+    opacity: 1;
+}
+
+/* Title in the middle of the bar (plugin) */
+.dx-player-title {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 32%;
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    white-space: nowrap;
+    pointer-events: none;
+    order: 9;
+}
+
+.dx-player-title b {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #fff;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dx-player-title span {
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--dx-text-2);
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@media (max-width: 1400px) {
+    .dx-player-title {
+        display: none;
+    }
+}
+
+/* Play / pause / seek feedback in the centre */
+.dx-player-flash {
+    position: absolute;
+    z-index: 5;
+    left: 50%;
+    top: 50%;
+    width: 6rem;
+    height: 6rem;
+    margin: -3rem 0 0 -3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.45);
+    color: #fff;
+    pointer-events: none;
+    opacity: 0;
+}
+
+.dx-player-flash svg {
+    width: 2.8rem;
+    height: 2.8rem;
+}
+
+.dx-player-flash b {
+    position: absolute;
+    bottom: -2rem;
+    font-size: 1rem;
+    font-weight: 700;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+}
+
+.dx-player-flash.is-on {
+    animation: dx-flash 0.65s var(--dx-ease-out) both;
+}
+
+@keyframes dx-flash {
+    0% { opacity: 0; transform: scale(0.6); }
+    25% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.35); }
+}
+
+/* ---------- Panels (subtitles, audio, speed, info, more) ---------- */
+
+#app [class*="player-container"] [class*="menu-layer"] {
+    bottom: 7.5rem !important;
+    right: var(--dx-gutter) !important;
+    border-radius: 6px !important;
+    background: rgba(38, 38, 38, 0.97) !important;
+    border: 0 !important;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6) !important;
+    backdrop-filter: none !important;
+    overflow: hidden;
+    /* Must stay a transition: Stremio unmounts menus on transitionend */
+    transition: opacity 0.18s ease, transform 0.24s var(--dx-ease-out) !important;
+}
+
+#app [class*="player-container"] [class*="menu-layer"].fade-enter {
+    transform: translateY(10px);
+}
+
+#app [class*="player-container"] [class*="menu-layer"].fade-enter.fade-active {
+    transform: none;
+}
+
+#app [class*="player-container"] [class*="menu-layer"].fade-exit.fade-active {
+    transform: translateY(6px);
+}
+
+@keyframes dx-panel {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: none; }
+}
+
+/* Headings */
+#app [class*="player-container"] [class*="menu-layer"] [class*="languages-header"],
+#app [class*="player-container"] [class*="menu-layer"] [class*="variants-header"],
+#app [class*="player-container"] [class*="menu-layer"] [class*="settings-header"],
+#app [class*="player-container"] [class*="menu-layer"] > [class^="title-"],
+#app [class*="player-container"] [class*="menu-layer"] [class*="speed-title"] {
+    padding: 1.35rem 1.5rem 0.75rem !important;
+    font-size: 1.3rem !important;
+    font-weight: 700 !important;
+    color: #fff !important;
+    opacity: 1 !important;
+    text-align: left !important;
+}
+
+/* Subtitles: three columns separated by hairlines */
+#app [class*="subtitles-menu-container"] {
+    min-width: 0;
+}
+
+#app [class*="subtitles-menu-container"] [class*="languages-container"] {
+    width: 15rem;
+}
+
+#app [class*="subtitles-menu-container"] [class*="variants-container"] {
+    width: 17rem;
+}
+
+#app [class*="subtitles-menu-container"] [class*="subtitles-settings-container"] {
+    width: 15rem;
+    padding: 0 !important;
+}
+
+/* Short, Netflix-style column titles */
+#app [class*="player-container"] [class*="menu-layer"][class*="subtitles-menu-container"] [class*="languages-header"],
+#app [class*="player-container"] [class*="menu-layer"][class*="subtitles-menu-container"] [class*="variants-header"],
+#app [class*="player-container"] [class*="menu-layer"][class*="subtitles-menu-container"] [class*="settings-header"],
+#app [class*="player-container"] [class*="menu-layer"][class*="audio-menu-container"] [class*="languages-header"] {
+    font-size: 0 !important;
+}
+
+#app [class*="player-container"] [class*="menu-layer"][class*="subtitles-menu-container"] [class*="languages-header"]::after,
+#app [class*="player-container"] [class*="menu-layer"][class*="subtitles-menu-container"] [class*="variants-header"]::after,
+#app [class*="player-container"] [class*="menu-layer"][class*="subtitles-menu-container"] [class*="settings-header"]::after,
+#app [class*="player-container"] [class*="menu-layer"][class*="audio-menu-container"] [class*="languages-header"]::after {
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+#app [class*="player-container"] [class*="menu-layer"][class*="subtitles-menu-container"] [class*="languages-header"]::after { content: "Subtitles"; }
+#app [class*="player-container"] [class*="menu-layer"][class*="subtitles-menu-container"] [class*="variants-header"]::after { content: "Source"; }
+#app [class*="player-container"] [class*="menu-layer"][class*="subtitles-menu-container"] [class*="settings-header"]::after { content: "Adjust"; }
+#app [class*="player-container"] [class*="menu-layer"][class*="audio-menu-container"] [class*="languages-header"]::after { content: "Audio"; }
+
+#app [class*="player-container"] [class*="menu-layer"] [class*="languages-header"],
+#app [class*="player-container"] [class*="menu-layer"] [class*="variants-header"],
+#app [class*="player-container"] [class*="menu-layer"] [class*="settings-header"] {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#app [class*="subtitles-settings-container"] [class*="stepper"] {
+    width: 100%;
+    padding: 0 !important;
+}
+
+#app [class*="subtitles-settings-container"] [class*="stepper"] [class*="content"] {
+    width: 100%;
+    justify-content: space-between;
+}
+
+#app [class*="subtitles-settings-container"] [class*="stepper"] [class*="value"] {
+    white-space: nowrap;
+}
+
+#app [class*="subtitles-menu-container"] > * {
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+#app [class*="subtitles-menu-container"] > *:last-child {
+    border-right: 0;
+}
+
+/* Option rows with a tick on the selected one */
+#app [class*="player-container"] [class*="language-option"],
+#app [class*="player-container"] [class*="variant-option"],
+#app [class*="player-container"] [class*="menu-layer"] [class*="option-container"] {
+    position: relative;
+    min-height: 3rem;
+    margin: 0 !important;
+    padding: 0.55rem 1.5rem 0.55rem 3rem !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    transition: background-color 0.15s;
+}
+
+#app [class*="player-container"] [class*="language-option"]:hover,
+#app [class*="player-container"] [class*="variant-option"]:hover,
+#app [class*="player-container"] [class*="menu-layer"] [class*="option-container"]:hover,
+#app [class*="player-container"] [class*="language-option"]:focus-visible,
+#app [class*="player-container"] [class*="variant-option"]:focus-visible,
+#app [class*="player-container"] [class*="menu-layer"] [class*="option-container"]:focus-visible {
+    background: rgba(255, 255, 255, 0.06) !important;
+}
+
+#app [class*="player-container"] [class*="language-label"],
+#app [class*="player-container"] [class*="variant-label"],
+#app [class*="player-container"] [class*="menu-layer"] [class*="option-container"] [class*="label"] {
+    font-size: 1.08rem !important;
+    font-weight: 500 !important;
+    color: var(--dx-text-2) !important;
+}
+
+#app [class*="player-container"] [class*="variant-origin"] {
+    font-size: 0.82rem;
+    color: var(--dx-text-3) !important;
+}
+
+#app [class*="player-container"] [class*="language-option"].selected [class*="language-label"],
+#app [class*="player-container"] [class*="variant-option"].selected [class*="variant-label"],
+#app [class*="player-container"] [class*="menu-layer"] [class*="option-container"].selected [class*="label"] {
+    color: #fff !important;
+    font-weight: 700 !important;
+}
+
+#app [class*="player-container"] [class*="language-option"].selected::before,
+#app [class*="player-container"] [class*="variant-option"].selected::before {
+    content: "";
+    position: absolute;
+    left: 1.2rem;
+    top: 50%;
+    width: 1.1rem;
+    height: 1.1rem;
+    margin-top: -0.55rem;
+    background: #fff;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 12.5l5 5L20 6.5' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 12.5l5 5L20 6.5' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* Stock "selected" dot is replaced by the tick */
+#app [class*="player-container"] [class*="language-option"] > [class*="icon"],
+#app [class*="player-container"] [class*="variant-option"] > [class*="icon"] {
+    display: none !important;
+}
+
+#app [class*="player-container"] [class*="languages-list"],
+#app [class*="player-container"] [class*="variants-list"] {
+    padding-bottom: 0.75rem;
+}
+
+/* Delay / size / position steppers */
+#app [class*="subtitles-settings-container"] [class*="settings-list"] {
+    padding: 0 1.5rem 1.25rem;
+    gap: 0.9rem;
+}
+
+#app [class*="player-container"] [class*="stepper"] [class*="header"] {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--dx-text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+#app [class*="player-container"] [class*="stepper"] [class*="content"] {
+    height: 2.75rem;
+    border-radius: var(--dx-radius);
+    background: rgba(255, 255, 255, 0.07);
+}
+
+#app [class*="player-container"] [class*="stepper"] [class*="button"] {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--dx-radius);
+    background: transparent !important;
+}
+
+#app [class*="player-container"] [class*="stepper"] [class*="button"]:hover,
+#app [class*="player-container"] [class*="stepper"] [class*="button"]:focus-visible {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+#app [class*="player-container"] [class*="stepper"] [class*="value"] {
+    font-size: 1rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Playback speed: one line, dots, current speed highlighted */
+#app [class*="speed-menu-container"] {
+    width: 36rem;
+}
+
+#app [class*="speed-menu-container"] [class*="top-container"] {
+    display: none !important;
+}
+
+#app [class*="speed-menu-container"] [class*="options-container"] {
+    position: relative;
+    display: flex !important;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem 1.6rem !important;
+    gap: 0 !important;
+}
+
+#app [class*="speed-menu-container"] [class*="options-container"]::before {
+    content: "";
+    position: absolute;
+    left: 2.75rem;
+    right: 2.75rem;
+    top: 2.05rem;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.3);
+}
+
+#app [class*="speed-menu-container"] [class*="speed-button"] {
+    position: relative;
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.9rem;
+    height: auto !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--dx-text-2);
+}
+
+#app [class*="speed-menu-container"] [class*="speed-button"]::before {
+    content: "";
+    order: -1;
+    width: 0.9rem;
+    height: 0.9rem;
+    margin: 0.35rem 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.55);
+    transition: transform 0.2s var(--dx-ease-out), background-color 0.2s;
+}
+
+#app [class*="speed-menu-container"] [class*="speed-button"]:hover::before,
+#app [class*="speed-menu-container"] [class*="speed-button"]:focus-visible::before {
+    transform: scale(1.3);
+    background: #fff;
+}
+
+#app [class*="speed-menu-container"] [class*="speed-button"][class*="active"] {
+    color: #fff;
+    font-weight: 700;
+}
+
+#app [class*="speed-menu-container"] [class*="speed-button"][class*="active"]::before {
+    transform: scale(1.75);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.25);
+}
+
+/* Stream info */
+#app [class*="statistics-menu-container"] {
+    min-width: 24rem;
+    padding-bottom: 1rem;
+}
+
+#app [class*="statistics-menu-container"] [class*="stats"] {
+    padding: 0 1.5rem;
+    gap: 1.5rem;
+}
+
+#app [class*="statistics-menu-container"] [class*="stat-"] [class*="label"],
+#app [class*="statistics-menu-container"] [class*="detail"] [class*="label"] {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--dx-text-3);
+}
+
+#app [class*="statistics-menu-container"] [class*="value"] {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+#app [class*="statistics-menu-container"] [class*="detail"] {
+    padding: 1rem 1.5rem 0;
+}
+
+#app [class*="statistics-menu-container"] [class*="copyable-value"] {
+    border-radius: var(--dx-radius);
+    background: rgba(255, 255, 255, 0.07) !important;
+}
+
+/* "More" options */
+#app [class*="options-menu-container"] {
+    min-width: 17rem;
+    padding: 0.5rem 0;
+}
+
+#app [class*="options-menu-container"] [class*="option-container"] {
+    padding-left: 1.25rem !important;
+    gap: 0.9rem;
+}
+
+#app [class*="options-menu-container"] [class*="option-container"] svg {
+    width: 1.3rem;
+    height: 1.3rem;
+    color: var(--dx-text-2);
+}
+
+/* Episodes side drawer + its handle */
+#app [class*="player-container"] [class*="side-drawer-button-layer"] {
+    width: 2.5rem !important;
+    height: 6rem !important;
+    padding: 0 !important;
+    border-radius: 6px 0 0 6px !important;
+    background: rgba(38, 38, 38, 0.85) !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    transition: background-color 0.2s, width 0.2s;
+}
+
+#app [class*="player-container"] [class*="side-drawer-button-layer"]:hover,
+#app [class*="player-container"] [class*="side-drawer-button-layer"]:focus-visible {
+    width: 3rem !important;
+    background: rgba(60, 60, 60, 0.95) !important;
+}
+
+#app [class*="player-container"] [class*="side-drawer-layer"] {
+    background: rgba(24, 24, 24, 0.97) !important;
+    border-left: 1px solid rgba(255, 255, 255, 0.06) !important;
+    border-radius: 0 !important;
+    box-shadow: -20px 0 60px rgba(0, 0, 0, 0.5) !important;
+    backdrop-filter: none !important;
+}
+
+/* Buffering: a spinner instead of Stremio's title logo (the layer only exists while buffering) */
+#app [class*="player-container"] [class*="buffering-layer"] img,
+#app [class*="player-container"] [class*="buffering-layer"] [class*="image"] {
+    display: none !important;
+}
+
+#app [class*="player-container"] [class*="buffering-layer"] {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+#app [class*="player-container"] [class*="buffering-layer"]::before {
+    content: "";
+    width: 4.2rem;
+    height: 4.2rem;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.14);
+    border-top-color: var(--dx-accent);
+    filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.6));
+    animation: dx-spin 0.85s linear infinite;
+}
+
+@keyframes dx-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Up next */
+#app [class*="next-video-popup-container"] {
+    right: var(--dx-gutter) !important;
+    bottom: 8rem !important;
+    border-radius: 6px !important;
+    background: rgba(38, 38, 38, 0.97) !important;
+    border: 0;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+    overflow: hidden;
+    animation: dx-panel 0.3s var(--dx-ease-out) both;
+}
+
+#app [class*="next-video-popup-container"] [class*="play-button"] {
+    background: #fff !important;
+    border-radius: var(--dx-radius) !important;
+}
+
+#app [class*="next-video-popup-container"] [class*="play-button"] * {
+    color: #000 !important;
+}
+
+/* =====================================================================
+   13. STREMIO ENHANCED'S OWN UI (themes/plugins list, alerts)
+   ===================================================================== */
+
+#enhanced [class*="option-"] {
+    border-radius: var(--dx-radius);
+}
+
+#enhanced .install-button-container-yfcq5,
+#enhanced .uninstall-button-container-oV4Yo,
+#enhanced [id$=".theme.css"],
+#enhanced [id="Default"] {
+    border-radius: var(--dx-radius) !important;
+}
+
+.toast-container,
+#enhanced-alert-container,
+[class*="enhanced-alert"] {
+    border-radius: var(--dx-radius-l) !important;
+}
+
+/* =====================================================================
+   14. ACCESSIBILITY
+   ===================================================================== */
+
+/* Keyboard focus looks the same as pointing with the mouse (every hover style above also answers
+   to :focus-visible), never a square outline drawn around things */
+:focus-visible {
+    outline: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* =====================================================================
+   15. REFINEMENTS
+   ===================================================================== */
+
+/* Stock hover tooltips sit in the middle of posters — the preview card replaces them.
+   The plugin flags the tooltip box itself while a poster is pointed at: a body:has(...:hover) rule
+   (or any class on <html>/<body>) made the browser restyle the whole page on every hover. */
+.tooltips-items-container[data-dx-hide] {
+    display: none !important;
+}
+
+
+/* Wide card when no backdrop exists: blurred poster + sharp poster */
+.dx-wide-art.is-fallback {
+    background: var(--dx-surface-2) !important;
+}
+
+.dx-wide-blur {
+    position: absolute;
+    inset: -20px;
+    background-size: cover;
+    background-position: center;
+    filter: blur(22px) brightness(0.55) saturate(1.2);
+}
+
+.dx-wide-thumb {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 35%);
+    mask-image: linear-gradient(90deg, transparent 0%, #000 35%);
+}
+
+.dx-wide-art.is-fallback .dx-wide-name {
+    right: 40%;
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+/* Addons: actions readable; disabled stays dim */
+#app [class*="addon-container"] [class*="uninstall-button-container"] {
+    opacity: 1 !important;
+}
+
+#app [class*="addon-container"] [class*="uninstall-button-container"].disabled {
+    opacity: 0.35 !important;
+}
+
+#app [class*="addon-container"] [class*="configure-button-container"] {
+    background: var(--dx-surface-2) !important;
+    border: 1px solid var(--dx-line) !important;
+}
+
+#app [class*="addon-container"] [class*="configure-button-container"]:hover,
+#app [class*="addon-container"] [class*="configure-button-container"]:focus-visible {
+    background: var(--dx-surface-3) !important;
+}
+
+#app [class*="addon-container"] [class*="configure-button-container"] * {
+    color: var(--dx-text) !important;
+}
+
+/* Settings: links in white, not accent */
+#app [class*="settings-content"] [class*="link-"],
+#app [class*="settings-content"] a {
+    color: var(--dx-text-2) !important;
+    transition: color 0.2s;
+}
+
+#app [class*="settings-content"] [class*="link-"]:hover,
+#app [class*="settings-content"] a:hover,
+#app [class*="settings-content"] [class*="link-"]:focus-visible,
+#app [class*="settings-content"] a:focus-visible {
+    color: #fff !important;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+#app [class*="settings-content"] [class*="user-info-content"] [class*="avatar"] {
+    border: 0 !important;
+    box-shadow: 0 0 0 1px var(--dx-line-strong);
+}
+
+/* =====================================================================
+   16. COMMUNITY PLUGINS (Addon Manager, TheIntroDB, Enhanced Player)
+   ===================================================================== */
+
+html:root {
+    --am-accent: var(--dx-accent);
+    --am-bg: var(--dx-bg-raised);
+    --am-border-radius: var(--dx-radius-l);
+}
+
+body .am-header-btn {
+    height: 2.5rem;
+    border-radius: var(--dx-radius);
+    border: 1px solid var(--dx-line-strong);
+    background: var(--dx-surface);
+    color: var(--dx-text);
+    font-size: 0.9rem;
+}
+
+body .am-header-btn:hover,
+body .am-header-btn:focus-visible {
+    background: var(--dx-surface-2);
+    transform: none;
+}
+
+body .am-header-btn.active {
+    background: var(--dx-accent);
+    border-color: var(--dx-accent);
+    color: #fff;
+}
+
+body .am-modal {
+    background: var(--dx-surface);
+    border: 1px solid var(--dx-line);
+    border-radius: var(--dx-radius-l);
+}
+
+/* Skip intro / recap button from TheIntroDB */
+body #tidb-active-btn,
+body #skiprange-active-btn,
+body #skiprange-upgrade-btn {
+    padding: 0.85rem 1.5rem 0.85rem 1.25rem !important;
+    border-radius: var(--dx-radius) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.75) !important;
+    background: rgba(18, 18, 22, 0.72) !important;
+    backdrop-filter: blur(10px) !important;
+    font-family: "Inter", sans-serif !important;
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.01em;
+    box-shadow: var(--dx-shadow-2);
+}
+
+body #tidb-active-btn:hover,
+body #skiprange-active-btn:hover,
+body #skiprange-upgrade-btn:hover,
+body #tidb-active-btn:focus-visible,
+body #skiprange-active-btn:focus-visible,
+body #skiprange-upgrade-btn:focus-visible {
+    background: #fff !important;
+    color: #000 !important;
+    border-color: #fff !important;
+}
+
+
+/* Enhanced Player title above the seek bar */
+#app .custom-series-name {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--dx-text-2);
+}
+
+#app .custom-episode-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+/* Plugin settings dialogs: label above its description, not squeezed beside it */
+[class*="modal-dialog-container"] [class*="option-"] > [class*="heading-"] {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: center;
+    gap: 0.2rem;
+}
+
+[class*="modal-dialog-container"] [class*="option-"] > [class*="heading-"] > [class*="label-"] {
+    font-weight: 600;
+    color: var(--dx-text);
+}
+
+[class*="modal-dialog-container"] [class*="option-"] > [class*="heading-"] > div:not([class]) {
+    color: var(--dx-text-3) !important;
+    margin-top: 0 !important;
+}
+
+[class*="modal-dialog-container"] select {
+    border-radius: var(--dx-radius) !important;
+    background-color: var(--dx-surface-2) !important;
+    border: 1px solid var(--dx-line) !important;
+}
+
+[class*="modal-dialog-container"] [class*="buttons-container"] [class*="action-button"] {
+    border-radius: var(--dx-radius) !important;
+}
+
+[class*="modal-dialog-container"] [class*="option-"] > [class*="heading-"] {
+    flex: 1 1 auto !important;
+    max-width: none !important;
+    width: auto !important;
+}
+
+[class*="modal-dialog-container"] [class*="option-"] > [class*="content-"]:has([class*="toggle-container"]) {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    max-width: none !important;
+}
+
+#app [class*="subtitles-settings-container"] [class*="stepper"] + [class*="stepper"] {
+    margin-top: 1rem !important;
+}
+
+#app [class*="subtitles-settings-container"] [class*="stepper"] [class*="header"] {
+    margin-bottom: 0.45rem !important;
+}
+
+::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+/* =====================================================================
+   17. CONTEXT MENU FIX compatibility
+   That plugin clones the account button (and other menus) into
+   .context-menu-portal outside #app, so give the clones the same look.
+   ===================================================================== */
+
+.context-menu-portal [class*="menu-button-container"] {
+    display: flex !important;
+    align-items: center;
+    gap: 0.4rem;
+    height: 2.5rem !important;
+    padding: 0 0.4rem !important;
+    border-radius: var(--dx-radius) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    overflow: visible !important;
+}
+
+.context-menu-portal [class*="menu-button-container"] > [class*="avatar"] {
+    flex: none;
+    width: 2rem !important;
+    height: 2rem !important;
+    border: 0 !important;
+    border-radius: var(--dx-radius-s) !important;
+    overflow: hidden;
+}
+
+.context-menu-portal [class*="menu-button-container"] > [class*="avatar"] img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+}
+
+.context-menu-portal [class*="menu-button-container"] > svg {
+    flex: none;
+    width: 1.1rem !important;
+    height: 1.1rem !important;
+    color: var(--dx-text);
+}
+
+.context-menu-portal [class*="menu-container"][class*="menu-direction"],
+.context-menu-portal [class*="nav-menu-container"] {
+    border-radius: var(--dx-radius-l) !important;
+    background: rgba(22, 22, 27, 0.97) !important;
+    border: 1px solid var(--dx-line-strong) !important;
+    box-shadow: var(--dx-shadow-2) !important;
+    overflow: hidden;
+}
+
+.context-menu-portal [class*="menu-container"][class*="menu-direction"] [class*="nav-menu-container"] {
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+/* Account menu (both in-app and cloned) */
+[class*="nav-menu-container"] [class*="user-info-container"] [class*="avatar"],
+[class*="nav-menu-container"] [class*="avatar"] {
+    border: 0 !important;
+    border-radius: var(--dx-radius) !important;
+    box-shadow: 0 0 0 1px var(--dx-line-strong);
+}
+
+[class*="nav-menu-container"] [class*="nav-menu-option-container"] {
+    border-radius: var(--dx-radius);
+    transition: background-color 0.15s;
+}
+
+[class*="nav-menu-container"] [class*="nav-menu-option-container"]:hover,
+[class*="nav-menu-container"] [class*="nav-menu-option-container"]:focus-visible {
+    background: rgba(255, 255, 255, 0.08) !important;
+}
+
+[class*="nav-menu-container"] [class*="nav-menu-option-container"] svg {
+    color: var(--dx-text-2);
+}
+
+
+/* =====================================================================
+   18. ENHANCED VIDEO PLAYER compatibility (subtitle style panel + title)
+   ===================================================================== */
+
+/* Stremflix shows the title in the control bar; hide the duplicate */
+body[data-dx-ptitle] #app .custom-series-name,
+body[data-dx-ptitle] #app .custom-episode-title {
+    display: none !important;
+}
+
+#app [class*="subtitles-menu-container"] .enhanced-subtitle-customize-section {
+    width: 22rem;
+    max-height: 100%;
+    padding: 0 1.5rem 1.25rem;
+    overflow-y: auto;
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 0.9rem;
+    color: var(--dx-text-2);
+}
+
+#app .enhanced-subtitle-customize-header {
+    display: flex;
+    align-items: center;
+    padding: 1.35rem 0 0.75rem;
+    font-size: 0 !important;
+}
+
+#app .enhanced-subtitle-customize-header > * {
+    display: none !important;
+}
+
+#app .enhanced-subtitle-customize-header::after {
+    content: "Style";
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+#app .enhanced-subtitle-presets-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+}
+
+#app .enhanced-subtitle-preset-btn {
+    height: 2rem;
+    padding: 0 0.85rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid transparent;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--dx-text-2);
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s;
+}
+
+#app .enhanced-subtitle-preset-btn:hover,
+#app .enhanced-subtitle-preset-btn:focus-visible {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+}
+
+#app .enhanced-subtitle-preset-btn.selected {
+    background: #fff;
+    color: #000;
+}
+
+#app .enhanced-subtitle-preview-section {
+    margin-bottom: 1rem;
+}
+
+#app .enhanced-subtitle-preview-label,
+#app .enhanced-stepper-header,
+#app .enhanced-select-header,
+#app .enhanced-color-header,
+#app .enhanced-text-header {
+    margin-bottom: 0.4rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--dx-text-3);
+}
+
+#app .enhanced-subtitle-preview-box {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    height: 5.5rem;
+    padding: 0.75rem;
+    border-radius: var(--dx-radius);
+    background:
+        linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.35)),
+        url("https://images.metahub.space/background/medium/tt1375666/img") center / cover,
+        #333;
+    overflow: hidden;
+}
+
+#app .enhanced-subtitle-preview-text {
+    max-width: 100%;
+    text-align: center;
+    white-space: normal;
+}
+
+#app .enhanced-settings-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.85rem 0.75rem;
+}
+
+#app .enhanced-stepper-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 2.5rem;
+    border-radius: var(--dx-radius);
+    background: rgba(255, 255, 255, 0.07);
+}
+
+#app .enhanced-stepper-button {
+    width: 2.5rem;
+    height: 2.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--dx-radius);
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+}
+
+#app .enhanced-stepper-button:hover,
+#app .enhanced-stepper-button:focus-visible {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+#app .enhanced-stepper-button svg {
+    width: 0.9rem;
+    height: 0.9rem;
+}
+
+#app .enhanced-stepper-value {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: #fff;
+}
+
+#app .enhanced-select,
+#app .enhanced-text-input {
+    width: 100%;
+    height: 2.5rem;
+    padding: 0 0.75rem;
+    border-radius: var(--dx-radius);
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid transparent;
+    color: #fff;
+    font-size: 0.85rem;
+    appearance: auto;
+}
+
+#app .enhanced-select:focus,
+#app .enhanced-text-input:focus {
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+#app .enhanced-select option {
+    background: #262626;
+    color: #fff;
+}
+
+#app .enhanced-color-content {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    height: 2.5rem;
+    padding: 0 0.5rem;
+    border-radius: var(--dx-radius);
+    background: rgba(255, 255, 255, 0.07);
+}
+
+#app .enhanced-color-input {
+    width: 1.6rem;
+    height: 1.6rem;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    overflow: hidden;
+    cursor: pointer;
+    appearance: none;
+}
+
+#app .enhanced-color-input::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+#app .enhanced-color-input::-webkit-color-swatch {
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+}
+
+#app .enhanced-color-value {
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--dx-text-2);
+}
+
+/* =====================================================================
+   19. STREAM PLUGINS compatibility (Stream Keyword Filter, Stream Finder,
+   FilterStreams, Stream Quality Picker…). Anything a plugin inserts next to
+   the streams/episodes panel is stacked on top of it as one column.
+   ===================================================================== */
+
+#app [class*="metadetails-content"]:has(> :not([class*="meta-preview"]):not([class*="spacing"]):not([class*="streams-list"]):not([class*="videos-list"])) {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) clamp(28rem, 31vw, 42rem);
+    grid-template-rows: auto auto auto minmax(0, 1fr);
+    column-gap: 1.5rem;
+    padding-right: var(--dx-gutter) !important;
+}
+
+#app [class*="metadetails-content"]:has(> :not([class*="meta-preview"]):not([class*="spacing"]):not([class*="streams-list"]):not([class*="videos-list"])) > [class*="meta-preview"] {
+    grid-column: 1;
+    grid-row: 1 / -1;
+    min-height: 0;
+}
+
+#app [class*="metadetails-content"]:has(> :not([class*="meta-preview"]):not([class*="spacing"]):not([class*="streams-list"]):not([class*="videos-list"])) > [class*="spacing"] {
+    display: none !important;
+}
+
+#app [class*="metadetails-content"] > :not([class*="meta-preview"]):not([class*="spacing"]):not([class*="streams-list"]):not([class*="videos-list"]) {
+    grid-column: 2;
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0.85rem 1rem !important;
+    background: rgba(19, 19, 23, 0.86) !important;
+    border: 1px solid var(--dx-line);
+    border-bottom: 0;
+    backdrop-filter: blur(24px) saturate(140%);
+    z-index: 2;
+}
+
+#app [class*="metadetails-content"] > :not([class*="meta-preview"]):not([class*="spacing"]):not([class*="streams-list"]):not([class*="videos-list"]):first-of-type,
+#app [class*="metadetails-content"] > [class*="spacing"] + :not([class*="streams-list"]):not([class*="videos-list"]) {
+    margin-top: 0.75rem !important;
+    border-radius: var(--dx-radius-l) var(--dx-radius-l) 0 0;
+}
+
+#app [class*="metadetails-content"]:has(> :not([class*="meta-preview"]):not([class*="spacing"]):not([class*="streams-list"]):not([class*="videos-list"])) > [class*="streams-list"],
+#app [class*="metadetails-content"]:has(> :not([class*="meta-preview"]):not([class*="spacing"]):not([class*="streams-list"]):not([class*="videos-list"])) > [class*="videos-list"] {
+    grid-column: 2;
+    grid-row: 4;
+    width: auto !important;
+    flex: none !important;
+    min-height: 0;
+    margin: 0 0 1.5rem 0 !important;
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+    animation: none;
+}
+
+/* Chips / inputs that stream plugins add: match Stremflix */
+#app [class*="metadetails-content"] [class*="chip"]:not([class*="chips"]) {
+    border-radius: 999px;
+}
+
+/* AniSkip shows its buttons inside Stremio's "up next" popup */
+#app [id^="skip-"][id$="-button"] {
+    border-radius: var(--dx-radius) !important;
+    background: #fff !important;
+}
+
+#app [id^="skip-"][id$="-button"] * {
+    color: #000 !important;
+}
+
+/* =====================================================================
+   20. STREAM SORT & FILTER BAR (plugin)
+   ===================================================================== */
+
+/* Sorting uses CSS order, so the list must be a flex column */
+#app [class*="streams-container"].dx-sortable {
+    display: flex !important;
+    flex-direction: column;
+}
+
+#app [class*="streams-container"].dx-sortable > [data-dx-hide] {
+    display: none !important;
+}
+
+.dx-streambar {
+    flex: none;
+    padding: 0.85rem 0.85rem 0.75rem;
+    border-bottom: 1px solid var(--dx-line);
+    overflow: visible !important;
+}
+
+.dx-streambar[hidden] {
+    display: none;
+}
+
+.dx-sb-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    overflow: visible !important;
+}
+
+.dx-sb-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    height: 2rem;
+    padding: 0.12em 0.7rem 0 0.8rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid var(--dx-line);
+    color: var(--dx-text-2);
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.dx-sb-btn:hover,
+.dx-sb-btn:focus-visible {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+}
+
+.dx-sb-btn svg {
+    width: 0.85rem;
+    height: 0.85rem;
+    flex: none;
+    margin-top: -0.12em;
+    transition: transform 0.2s var(--dx-ease-out);
+}
+
+.dx-sb-btn.is-open svg:last-child {
+    transform: rotate(180deg);
+}
+
+.dx-sb-btn.is-on {
+    background: #fff;
+    border-color: #fff;
+    color: #000;
+}
+
+.dx-sb-sort {
+    padding-left: 0.7rem;
+    color: #fff;
+}
+
+.dx-sb-sort svg:first-child {
+    width: 0.95rem;
+    height: 0.95rem;
+}
+
+.dx-sb-toggle {
+    padding-right: 0.8rem;
+}
+
+.dx-sb-div {
+    width: 1px;
+    height: 1.2rem;
+    margin: 0 0.15rem;
+    background: var(--dx-line-strong);
+}
+
+.dx-sb-count {
+    margin-left: auto;
+    padding-left: 0.5rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--dx-text-3);
+    white-space: nowrap;
+}
+
+.dx-sb-reset {
+    padding: 0.2rem 0.1rem;
+    background: none;
+    border: 0;
+    color: var(--dx-text-2);
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.dx-sb-reset:hover,
+.dx-sb-reset:focus-visible {
+    color: #fff;
+}
+
+/* The open menu unfolds in place (no clipping inside the panel) */
+.dx-sb-menu {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.65rem;
+    padding: 0.6rem;
+    border-radius: var(--dx-radius);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--dx-line);
+    animation: dx-fade 0.18s ease both;
+}
+
+.dx-sb-opt {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    height: 2rem;
+    padding: 0.12em 0.75rem 0 0.55rem;
+    border-radius: var(--dx-radius-s);
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--dx-text-2);
+    font-size: 0.84rem;
+    font-weight: 500;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.dx-sb-opt:hover,
+.dx-sb-opt:focus-visible {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+
+.dx-sb-opt.is-on {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: #fff;
+    font-weight: 700;
+}
+
+.dx-sb-check {
+    display: inline-flex;
+    width: 0.95rem;
+    height: 0.95rem;
+    flex: none;
+    border-radius: 3px;
+    box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.35);
+    margin-top: -0.12em;
+}
+
+.dx-sb-opt.is-on .dx-sb-check {
+    background: var(--dx-accent);
+    box-shadow: none;
+    color: #fff;
+}
+
+.dx-sb-check svg {
+    width: 100%;
+    height: 100%;
+    padding: 1px;
+}
+
+.dx-sb-n {
+    font-size: 0.72rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--dx-text-3);
+}
+
+.dx-stream-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 2.5rem 1rem;
+    color: var(--dx-text-2);
+    font-size: 0.95rem;
+    text-align: center;
+}
+
+.dx-stream-empty button {
+    height: 2.2rem;
+    padding: 0 1rem;
+    border-radius: var(--dx-radius);
+    background: #fff;
+    color: #000;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* =====================================================================
+   21. SEEK BAR PREVIEW + NEXT EPISODE (plugin)
+   ===================================================================== */
+
+.dx-scrub {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    overflow: visible !important;
+}
+
+/* lighter fill from the playhead to the cursor */
+.dx-scrub-fill {
+    position: absolute;
+    top: 50%;
+    height: var(--track-size, 4px);
+    transform: translateY(-50%);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.35);
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+
+.dx-scrub.is-on .dx-scrub-fill {
+    opacity: 1;
+}
+
+.dx-scrub-tip {
+    position: absolute;
+    bottom: calc(100% + 1.1rem);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.45rem;
+    transform: translateX(-50%) translateY(6px);
+    opacity: 0;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.dx-scrub.is-on .dx-scrub-tip {
+    opacity: 1;
+    transform: translateX(-50%);
+}
+
+.dx-scrub-frame {
+    display: none;
+    width: 16rem;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    border-radius: 6px;
+    background: #000;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+    overflow: hidden !important;
+}
+
+.dx-scrub.has-frame .dx-scrub-frame,
+.dx-scrub.is-loading .dx-scrub-frame {
+    display: block;
+}
+
+/* loading: a 16:9 dark box with a soft moving sheen until the frame arrives */
+.dx-scrub.is-loading:not(.has-frame) .dx-scrub-frame {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: #141414;
+}
+
+.dx-scrub.is-loading:not(.has-frame) .dx-scrub-frame canvas {
+    visibility: hidden;
+}
+
+.dx-scrub.is-loading:not(.has-frame) .dx-scrub-frame::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.08) 50%, transparent 70%);
+    animation: dx-scrub-sheen 1.1s linear infinite;
+}
+
+@keyframes dx-scrub-sheen {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(100%); }
+}
+
+.dx-scrub-frame canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.dx-scrub-time {
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.75);
+    font-size: 0.95rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: #fff;
+    white-space: nowrap;
+}
+
+/* Next Episode sits at the start of the right-hand group, like Netflix */
+#app [class*="player-container"] [class*="control-bar-buttons-container"] > [class*="spacing"] {
+    order: 3;
+}
+
+#app [class*="player-container"] [class*="control-bar-buttons-container"] > .dx-next,
+#app [class*="player-container"] [class*="control-bar-buttons-container"] > .dx-pip,
+#app [class*="player-container"] [class*="control-bar-buttons-container"] > .dx-external {
+    order: 4;
+}
+
+#app [class*="player-container"] [class*="control-bar-buttons-container"] > [class*="control-bar-buttons-menu-container"],
+#app [class*="player-container"] [class*="control-bar-buttons-container"] > [class*="control-bar-buttons-menu-button"] {
+    order: 5;
+}
+
+/* Let the preview card rise above the bar (Stremio clips overflow on these) */
+#app [class*="player-container"] [class*="control-bar-layer"],
+#app [class*="player-container"] [class*="control-bar-container"],
+#app [class*="player-container"] [class*="seek-bar-container"],
+#app [class*="player-container"] [class*="seek-bar-container"] [class*="slider-wrapper"],
+#app [class*="player-container"] [class*="seek-bar-container"] [class*="slider-container"] {
+    overflow: visible !important;
+}
+
+/* Stremflix's card already shows the time — hide Stremio's small tooltip while it's there */
+body[data-dx-route="player"] > [class*="seek-tooltip"] {
+    display: none !important;
+}
+
+/* =====================================================================
+   22. PICTURE ENHANCEMENT (plugin): upscaled canvas over the video
+   ===================================================================== */
+
+.dx-enhance {
+    position: absolute;
+    z-index: 0;
+    pointer-events: none;
+    image-rendering: auto;
+}
+
+/* The video's own subtitle lines would sit under the canvas — Stremflix redraws them on top */
+#app [class*="player-container"] video[data-dx-enhanced]::cue {
+    visibility: hidden !important;
+}
+
+.dx-enhance-subs {
+    position: absolute;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15em;
+    pointer-events: none;
+    text-align: center;
+}
+
+.dx-enhance-cue {
+    display: inline-block;
+    max-width: 90%;
+    padding: 0.05em 0.35em;
+    line-height: 1.3;
+    white-space: pre-line;
+}
+
+.dx-enh-btn.is-on svg {
+    color: var(--dx-accent) !important;
+    filter: drop-shadow(0 0 6px color-mix(in srgb, var(--dx-accent) 60%, transparent));
+}
+
+.dx-player-toast {
+    position: absolute;
+    z-index: 6;
+    top: 6rem;
+    left: 50%;
+    padding: 0.6rem 1.1rem;
+    border-radius: 999px;
+    background: rgba(20, 20, 20, 0.85);
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 600;
+    pointer-events: none;
+    opacity: 0;
+    transform: translate(-50%, -6px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.dx-player-toast.is-on {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
+/* =====================================================================
+   WINDOWS AND TV: no blurred glass behind scrolling panels
+   ===================================================================== */
+
+/* Chromium on Windows can leave stale copies of a scrolled panel on screen when it has a blurred
+   (backdrop-filter) background: the streams list then looks like rows drawn over each other.
+   Solid backgrounds instead (Stremflix's plugin adds .dx-win on Windows). TVs (.dx-tv, Stremflix TV) get the
+   same, since their graphics are far weaker than a computer's. */
+.dx-win #app *,
+.dx-win body > *,
+.dx-tv #app *,
+.dx-tv body > * {
+    backdrop-filter: none !important;
+}
+
+.dx-win #app [class*="metadetails-content"] [class*="streams-list-container"],
+.dx-tv #app [class*="metadetails-content"] [class*="streams-list-container"] {
+    background: rgb(19, 19, 23) !important;
+}
+
+.dx-win #app [class*="menu-container"],
+.dx-win .context-menu-portal [class*="menu-container"],
+.dx-tv #app [class*="menu-container"] {
+    background: rgb(22, 22, 27) !important;
+}
+
+/* TV: the hover card's glow and soft shadow are big blurred layers redrawn as it opens */
+.dx-tv .dx-preview-aura,
+.dx-tv .dx-preview::before {
+    display: none;
+}
